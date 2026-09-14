@@ -285,11 +285,11 @@ Segunda vez en este proyecto que un problema visual solo aparece **mirando la im
 | H2 — cobertura 480–547px | **CERRADA**, con test falsable verificado por mí |
 | H3 — capturas con datos reales | **CERRADA**, fixture idéntico a la API |
 | H5 — `<select>` en Windows/Linux | **ACEPTADA COMO RIESGO**, documentada, no corregida |
-| H4 — B4 por oído | **ABIERTA**. Única condición pendiente. No la puede cerrar ningún agente. |
+| H4 — B4 por oído | **CERRADA por el usuario**, con VoiceOver real. Ver A.6. |
 
 ### Veredicto
 
-**COMPLETE, con una condición abierta que corresponde a una persona.**
+**COMPLETE.** (Al cerrarse T-16 quedaba una condición abierta, B4; el usuario la cerró después — ver A.6.)
 
 Los 18 defectos están corregidos y los 18 tienen ahora test de regresión —D18 era el último sin él y se cerró en
 T-15—. Los criterios A1–A6, B1–B3, B5, B6, C1, D1–D4 y E1 están verificados con evidencia ejecutable. **B4 está
@@ -303,3 +303,31 @@ se rechazaron con análisis, no por gusto, y la aplicación no los echa de menos
 **Lo que este proyecto hizo mal cinco veces y merece constar por encima del resultado:** dar por buena una cifra
 que nadie había medido. Cuatro estimaciones aritméticas y una medición de muestra única, en cuatro agentes
 distintos, incluido el que escribió la regla de no hacerlo. La suite no lo detecta; solo lo detecta volver a medir.
+
+---
+
+## A.6 B4 — cierre de la última condición (verificación humana)
+
+**B4 queda satisfecho.** El usuario ejecutó la aplicación con **VoiceOver real** y confirmó por oído que la
+paginación se anuncia y que la navegación funciona correctamente con el lector de pantalla activo.
+
+Es la única verificación de todo el proyecto que no pudo hacer ninguno de los cuatro agentes. El Architect la
+declaró no automatizable; el Designer, en la auditoría, se negó explícitamente a firmarla con la evidencia de CDP
+—«sería deshonesto escribir *lo confirmé con VoiceOver* sin haberlo hecho»— y la elevó como condición; yo la pasé
+al usuario en vez de darla por buena. Esa cadena de tres negativas a firmar es la razón de que ahora se pueda
+afirmar de verdad.
+
+**Alcance exacto de lo confirmado, para no inflarlo:** se confirmó que el lector anuncia y que la página funciona
+bien con él. No se registró la cadena literal pronunciada, porque no se pidió al usuario que la transcribiera. El
+criterio B4 exige que el cambio de página **se anuncie**, y eso está verificado con un lector de pantalla real por
+una persona. La evidencia automatizada (`live=polite`, `atomic=true`, `relevant="additions text"` en el árbol de
+accesibilidad de Chromium, medido antes y después del cambio de página) sigue en pie como respaldo, y ahora
+respalda algo que además se ha oído.
+
+---
+
+# ESTADO FINAL DEL PROYECTO: COMPLETE
+
+Sin condiciones abiertas. 18/18 defectos corregidos, 18/18 con test de regresión. Criterios A1–A6, B1–B6, C1,
+D1–D4 y E1 satisfechos y verificados. `pnpm verify` en verde, reproducido de forma independiente por tres agentes
+distintos. Dependencias de producción: `react` y `react-dom`, las mismas dos del primer día.
