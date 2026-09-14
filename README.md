@@ -9,8 +9,10 @@ compacta para movil.
 | ![Escritorio, tema claro](screenshots/escritorio-claro.png)   | ![Compacto, tema claro](screenshots/compacto-claro.png)   |
 | ![Escritorio, tema oscuro](screenshots/escritorio-oscuro.png) | ![Compacto, tema oscuro](screenshots/compacto-oscuro.png) |
 
-Las capturas se generan con `pnpm screenshots` desde el build de produccion y
-con datos fijos, asi que se pueden regenerar cuando la UI cambie.
+Las capturas se generan con `pnpm screenshots` desde el build de produccion.
+Los datos son una copia literal de la respuesta real de JSONPlaceholder
+(`scripts/fixtures/todos.json`), servida desde el repositorio: se ve lo mismo
+que ve la aplicacion, y dos ejecuciones dan la misma imagen aunque no haya red.
 
 ## Desarrollo
 

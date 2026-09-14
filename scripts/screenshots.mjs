@@ -6,9 +6,14 @@
  * No forma parte de `pnpm verify`: se ejecuta a mano cuando la UI cambia, con
  * `pnpm screenshots`. Sirve el build de produccion y devuelve siempre la misma
  * respuesta de datos, asi que dos ejecuciones producen la misma imagen.
+ *
+ * Esa respuesta es una copia literal de la que devuelve JSONPlaceholder
+ * (`scripts/fixtures/todos.json`), no datos inventados: la portada tiene que
+ * ensenar lo que la aplicacion ensena de verdad. Se fija en vez de ir a la red
+ * para que las capturas sigan siendo reproducibles sin conexion.
  */
 import { spawn } from 'node:child_process';
-import { mkdirSync } from 'node:fs';
+import { mkdirSync, readFileSync } from 'node:fs';
 import { chromium } from '@playwright/test';
 
 const PORT = 4180;
@@ -16,35 +21,7 @@ const BASE = `http://127.0.0.1:${PORT}`;
 const API = 'https://jsonplaceholder.typicode.com/todos';
 const SALIDA = 'screenshots';
 
-const TITULOS = [
-  'Revisar el informe trimestral',
-  'Preparar la demo para el equipo',
-  'Actualizar la documentacion de la API',
-  'Responder a los comentarios del PR',
-  'Planificar la retrospectiva del sprint',
-  'Migrar el servicio de notificaciones',
-  'Reducir el tiempo de arranque del build',
-  'Auditar las dependencias del proyecto',
-  'Escribir la guia de contribucion',
-  'Revisar los permisos del bucket de backups',
-  'Cerrar las incidencias duplicadas',
-  'Anadir metricas al panel de latencia',
-  'Repasar el plan de recuperacion ante fallos',
-  'Documentar el proceso de despliegue',
-  'Limpiar las ramas ya fusionadas',
-  'Actualizar las capturas del manual',
-  'Revisar la accesibilidad del formulario',
-  'Configurar la rotacion de claves',
-  'Ajustar los limites de la cola de trabajos',
-  'Preparar el informe de incidencias del mes',
-];
-
-const TODOS = Array.from({ length: 200 }, (_unused, i) => ({
-  userId: 1,
-  id: i + 1,
-  title: TITULOS[i % TITULOS.length],
-  completed: i % 3 === 0,
-}));
+const TODOS = JSON.parse(readFileSync(new URL('./fixtures/todos.json', import.meta.url), 'utf8'));
 
 const TOMAS = [
   {
@@ -119,7 +96,10 @@ try {
       .getByText(/Mostrando|resultados/)
       .first()
       .waitFor();
-    await pagina.screenshot({ path: `${SALIDA}/${toma.nombre}.png` });
+    // `fullPage`: con los titulos reales, mas largos que los de antes, la lista
+    // de 10 filas ya no cabe en el alto del viewport en compacto y la barra de
+    // paginacion quedaba cortada por la mitad en la captura.
+    await pagina.screenshot({ path: `${SALIDA}/${toma.nombre}.png`, fullPage: true });
     await contexto.close();
     console.log(`  ${SALIDA}/${toma.nombre}.png`);
   }
