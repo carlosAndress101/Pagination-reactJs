@@ -81,10 +81,15 @@ reglas type-aware (`no-floating-promises`, `no-misused-promises`) es asumible. *
   fuera de la lista de defectos, corregido en T-11. Incumple WCAG 3.1.1: un lector de pantalla lee contenido español
   con fonética inglesa. Se registra como **D18** para que la auditoría lo cubra, con tarea T-11 y estado cerrado.
   No estaba en el inventario original porque los 17 defectos salieron de leer `src/`, y este vivía en `index.html`.
-- **DEC-14 — `flex-wrap` en la barra a 480–767px: aceptado, a ratificar por el DESIGNER en T-14.** Con 11 controles
-  (7 slots + 4 extremos) no caben en una fila a 480px (11×40 + 10×8 = 520 px contra 448 disponibles). Envolver
-  mantiene C1 sin tocar el algoritmo de la ventana, que el spec dice explícitamente que no debe cambiar con el
-  viewport. Es un cambio de CSS reversible: si el Designer prefiere otra solución, la pide en la auditoría.
+- **DEC-14 — `flex-wrap` en la barra a 480–539px: aceptado y RATIFICADO por el DESIGNER en T-14.** Con 11 controles
+  (7 slots + 4 extremos) no caben en una fila por debajo de 540px. Envolver mantiene C1 sin tocar el algoritmo de
+  la ventana, que el spec dice explícitamente que no debe cambiar con el viewport.
+
+  **Corregido tras la auditoría (hallazgo H6).** La redacción original decía «520 px necesarios» y «480–767px».
+  Ambas cifras eran estimaciones aritméticas mías (11×40 + 10×8) y ambas eran falsas. Medido en navegador real por
+  el Designer: el ancho necesario es **507 px** y el rango donde la barra envuelve de verdad es **480–539px** — a
+  partir de 540px cabe en una fila. Cuarto caso en este proyecto de una cifra estimada que no resistió una medición;
+  ver DEC-04. La solución era correcta, el alcance declarado no.
 
 ## A.3 GATE 2 — cierre de la implementación (verificado por el ORCHESTRATOR)
 
@@ -181,3 +186,37 @@ Estados: `BLOCKED` `READY` `IN_PROGRESS` `REVIEW` `FAILED` `NEEDS_REMEDIATION` `
 3. **Parada obligatoria en GATE 1.** No empezar T-10 sin mi revisión: es donde cambia el comportamiento visible.
 4. Si algo del plan choca con la realidad del código, **parar y reportar**, no improvisar una solución distinta.
 5. T-12 puede escribirse en paralelo a T-07..T-09 si conviene, pero **nunca** a la vez que T-10/T-11 (mismo checkout).
+
+---
+
+## A.4 Disposición de la auditoría T-14 (decisión del ORCHESTRATOR)
+
+Veredicto del Designer en Audit Mode: **READY_WITH_CONDITIONS**, 0 P0, 0 P1, 6 hallazgos (H1–H6).
+
+Antes de aceptarlo verifiqué yo mismo los cuatro hallazgos comprobables sin navegador. Los cuatro son ciertos:
+`playwright.config.ts` declara `320/375/414/768/1280` y ningún spec de `e2e/` sobrescribe el viewport (H2);
+`scripts/screenshots.mjs:19` define 20 títulos inventados (H3); DEC-14 decía 520 px y 480–767px (H6); y no existe
+ningún test del atributo `lang` en todo el árbol.
+
+**Un hallazgo que la auditoría no hizo.** El informe marca D18 como CORREGIDO citando `index.html:2`. El atributo
+está, pero no hay ninguna prueba que lo proteja: D18 es el único de los 18 defectos cerrado sin test de regresión, y
+la auditoría verificó la corrección sin verificar su blindaje. No invalida el veredicto —el defecto está corregido—
+pero es el tipo de hueco que un auditor debía haber marcado, y lo registro aquí para que conste que salió de la
+revisión del veredicto y no del informe.
+
+| # | Sev. | Decisión | Dueño |
+|---|---|---|---|
+| H1 | — | Confirma T-02c con evidencia propia. Nada que hacer. | — |
+| H2 | P2 | **A T-15.** Se cierra el hueco con cobertura real en 480–539px. DEC-04 exige medir; el rango se estimó dos veces sin medirse. | ENGINEER |
+| H3 | P2 | **A T-15.** Regenerar con una respuesta real y fija de JSONPlaceholder. Rotular las capturas como «ilustrativas» se rechaza: el objetivo del producto es parecer real, y una nota al pie no arregla una portada que enseña algo que la app nunca muestra. | ENGINEER |
+| H4 | P2 | **No remediable por ningún agente.** Se eleva al usuario como verificación humana. B4 queda como «correcto a nivel de árbol de accesibilidad, pendiente de confirmación audible». | USUARIO |
+| H5 | P3 | **No se remedia.** Riesgo dependiente de plataforma, no reproducido en dos métodos ni en dos modos de navegador. Tocar un control que funciona por un comportamiento que nadie ha observado aquí es exactamente el cambio que introduce el defecto siguiente. Se documenta como riesgo conocido y se cierra. | ORCHESTRATOR |
+| H6 | P3 | **Corregido ya**, en DEC-14 arriba. Documento mío, error mío. | ORCHESTRATOR |
+| D18 | — | **A T-15**, como estaba comprometido: test del atributo `lang`. | ENGINEER |
+
+**Riesgo aceptado (H5).** El `<select>` de salto directo podría disparar un `change` por pulsación de flecha en
+Chrome sobre Windows/Linux con el desplegable cerrado. No se reprodujo en macOS/Chromium en headless ni con ventana
+real. Se acepta conscientemente: afecta a una ruta alternativa (el salto directo existe solo en modo compacto, donde
+la navegación principal sigue siendo por botones), el impacto sería navegación de más, no pérdida de datos ni de
+acceso, y la corrección a ciegas —diferir el `change`, o sustituir el `<select>` nativo— cambiaría un control
+accesible y probado por uno sin probar. Si alguien reproduce el fallo en Windows o Linux, se reabre.
