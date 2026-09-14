@@ -23,6 +23,28 @@ ESLint 9 + typescript-eslint con linting *type-aware*, que oxlint no ofrece. Se 
 DEC-02 por completo, es preferencia declarada del usuario, y en una app sin cadenas de promesas la pérdida de
 reglas type-aware (`no-floating-promises`, `no-misused-promises`) es asumible. **No es un descuido: es una renuncia.**
 
+## A.1 Decisiones del GATE 1
+
+- **DEC-07 — A3, al cambiar el tamaño de página se conserva el primer elemento visible (*anclaje*).**
+  `nuevaPagina = floor(((paginaActual - 1) * tamañoAnterior) / tamañoNuevo) + 1`.
+  Descartadas las dos opciones que planteó el Engineer: *recortar a la última página válida* deja al usuario en
+  un sitio arbitrario (en la página 2 con tamaño 5 mira los ítems 6–10; al pasar a tamaño 50, recortar lo manda
+  a los ítems 51–100), y *volver a la página 1* pierde siempre la posición. El anclaje mantiene a la vista el
+  ítem que el usuario estaba mirando, que es lo que pide de verdad quien cambia el tamaño de página.
+  Cuesta lo mismo: una línea de aritmética, sin estado nuevo.
+  **Efecto secundario útil:** el resultado es siempre una página válida por construcción (`primerÍndice < total`),
+  así que A3 se cumple sin depender del recorte. `clampPage` se mantiene, pero para lo que de verdad lo necesita:
+  sanear `page` que llega de la URL (A6).
+- **DEC-08 — Criterio de aceptación de tamaño de bundle** (de T-01b): **JS ≤ 72 kB gzip** y **≤ 235 kB sin comprimir**,
+  con aviso a 70 kB. Hoy: 68.5 kB / 221.5 kB. Justificación medida por el Architect con una matriz 2×2
+  (Vite 4/8 × React 18/19): el +54 % es **98.5 % `react-dom`**; Vite 8 con rolldown **reduce** 1.5 kB, y el código
+  de la app no crece. No es un fallo de configuración ni de tree-shaking, es el suelo de React 19 (~66.9 kB gzip
+  para cualquier app). Se acepta el coste: revertir a React 18 recuperaría ~22.6 kB pero desharía una decisión
+  ya tomada, y cambiar de framework está fuera de scope.
+- **DEC-09 — T-12 (Playwright) va DESPUÉS de T-11**, no antes. Los specs de e2e afirman sobre roles, selectores y
+  el modo compacto que crean T-10 y T-11; escribirlos antes sería escribirlos a ciegas contra una UI inexistente.
+  Coincide con el paso 8 del orden del Architect. La ventana de paralelizarlo con la ola 1 ya pasó.
+
 ## B.0 Matriz de cobertura D1–D17 → tarea
 
 Añadida tras T-06, al detectar que **D4, D10 y D14 no estaban asignados a ninguna tarea**. Un defecto sin dueño
@@ -62,7 +84,7 @@ Estados: `BLOCKED` `READY` `IN_PROGRESS` `REVIEW` `FAILED` `NEEDS_REMEDIATION` `
 | — | **GATE 1 — revisión del Orchestrator** | ORCHESTRATOR | T-05..T-09 | BLOCKED |
 | T-10 | Reescritura de la UI accesible (D1/D2/D3/D7/D11/D14/D15 + `disabled` de D6, B1–B4) | ENGINEER | GATE 1 | BLOCKED |
 | T-11 | Estilos y theming (D8/D9/D12/D16/D17, C1) | ENGINEER | T-10 | BLOCKED |
-| T-12 | Andamiaje `verify:runtime` con Playwright (DEC-05) | ENGINEER | T-05 | BLOCKED |
+| T-12 | Andamiaje `verify:runtime` con Playwright (DEC-05) | ENGINEER | T-11 (DEC-09) | BLOCKED |
 | T-13 | Cierre: `pnpm verify` en verde + evidencia | ENGINEER | T-10..T-12 | BLOCKED |
 | T-14 | **AUDIT MODE** — verificación independiente | DESIGNER | T-13 | BLOCKED |
 | T-15 | Remediación de hallazgos P0/P1 | ENGINEER | T-14 | BLOCKED |
