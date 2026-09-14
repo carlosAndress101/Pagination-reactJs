@@ -1,26 +1,41 @@
 {
-  "name": "vite-project",
+  "name": "pagination-react",
   "private": true,
   "version": "0.0.0",
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "vite build",
-    "lint": "eslint src --ext js,jsx --report-unused-disable-directives --max-warnings 0",
-    "preview": "vite preview"
+    "build": "pnpm typecheck && vite build",
+    "preview": "vite preview",
+    "lint": "oxlint",
+    "format": "prettier --check .",
+    "format:write": "prettier --write .",
+    "typecheck": "tsc --noEmit -p tsconfig.json && tsc --noEmit -p tsconfig.node.json",
+    "typecheck:e2e": "tsc --noEmit -p tsconfig.e2e.json",
+    "test": "vitest run",
+    "screenshots": "node scripts/screenshots.mjs",
+    "verify:size": "node scripts/check-bundle-size.mjs",
+    "verify:runtime": "pnpm typecheck:e2e && playwright test",
+    "verify": "pnpm lint && pnpm format && pnpm typecheck && pnpm test && pnpm build && pnpm verify:size && pnpm verify:runtime"
   },
   "dependencies": {
-    "react": "^18.2.0",
-    "react-dom": "^18.2.0"
+    "react": "^19.3.0",
+    "react-dom": "^19.3.0"
   },
   "devDependencies": {
-    "@types/react": "^18.0.28",
-    "@types/react-dom": "^18.0.11",
-    "@vitejs/plugin-react-swc": "^3.0.0",
-    "eslint": "^8.38.0",
-    "eslint-plugin-react": "^7.32.2",
-    "eslint-plugin-react-hooks": "^4.6.0",
-    "eslint-plugin-react-refresh": "^0.3.4",
-    "vite": "^4.3.2"
+    "@playwright/test": "1.63.0",
+    "@testing-library/jest-dom": "^7.0.1",
+    "@testing-library/react": "^16.3.3",
+    "@testing-library/user-event": "^14.6.7",
+    "@types/node": "^26.5.1",
+    "@types/react": "^19.3.0",
+    "@types/react-dom": "^19.3.0",
+    "@vitejs/plugin-react": "^6.1.1",
+    "jsdom": "^30.0.1",
+    "oxlint": "^1.82.0",
+    "prettier": "^3.9.6",
+    "typescript": "^5.9.3",
+    "vite": "^8.3.0",
+    "vitest": "^5.0.0"
   }
 }

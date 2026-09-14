@@ -1,70 +1,474 @@
+/* =============================================================================
+   Hoja unica de la aplicacion (design-spec §2).
+   Sustituye a index.css + App.css + style/style.css, que se solapaban y
+   arrastraban restos de la plantilla de Vite (D9).
+   ============================================================================= */
+
+/* -----------------------------------------------------------------------------
+   Tokens — modo claro (design-spec §2.1). Los ratios de contraste estan
+   calculados en el spec y revalidados por el Architect: no se ajustan a ojo.
+   -------------------------------------------------------------------------- */
 :root {
-  font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
-  line-height: 1.5;
-  font-weight: 400;
-
   color-scheme: light dark;
-  color: rgb(255, 255, 255);
-  background-color: #242424;
 
-  font-synthesis: none;
-  text-rendering: optimizeLegibility;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
+  --color-bg: #ffffff;
+  --color-bg-subtle: #f3f4f6;
+  --color-bg-subtle-2: #e5e7eb;
+  --color-surface: #ffffff;
+  --color-border-subtle: #e5e7eb;
+  --color-border-default: #6b7280; /* 4.83:1 sobre --color-bg */
+  --color-text-primary: #1f2937; /* 14.68:1 */
+  --color-text-secondary: #4b5563; /* 7.56:1 */
+  --color-text-disabled: #9ca3af; /* exento: WCAG exime controles inactivos */
+  --color-accent: #2563eb;
+  --color-on-accent: #ffffff;
+  --color-accent-emphasis: #1d4ed8; /* 6.70:1 */
+  --color-accent-subtle-bg: #dbeafe;
+  --color-accent-subtle-text: #1d4ed8; /* 5.49:1 sobre --color-accent-subtle-bg */
+  --color-danger: #dc2626; /* 4.83:1 */
+  --shadow-xs: 0 1px 2px rgb(0 0 0 / 6%);
+
+  --font-sans:
+    ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+
+  --text-xs-size: 0.75rem;
+  --text-xs-lh: 1rem;
+  --text-sm-size: 0.875rem;
+  --text-sm-lh: 1.25rem;
+  --text-base-size: 1rem;
+  --text-base-lh: 1.5rem;
+  --text-2xl-size: 1.875rem;
+  --text-2xl-lh: 2.25rem;
+
+  --font-normal: 400;
+  --font-medium: 500;
+  --font-semibold: 600;
+
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+  --space-8: 32px;
+
+  --radius-sm: 6px;
+  --radius-md: 10px;
+
+  --focus-ring-width: 2px;
+  --focus-ring-offset: 2px;
+
+  --control-size: 40px; /* >=480px: uso con raton */
+
+  /* Alto exacto de una fila de lista: linea + padding vertical + separador.
+     El skeleton usa el mismo valor para que el contenedor no salte. */
+  --row-height: calc(var(--text-base-lh) + var(--space-1) * 2 + 1px);
+}
+
+/* -----------------------------------------------------------------------------
+   Tokens — modo oscuro (design-spec §2.2).
+   D17: aqui se redefinen SOLO los tokens. El fondo de `body` se deriva de
+   --color-bg, nunca se hardcodea; ese era exactamente el fallo original, donde
+   `body { background: #242424 }` vivia fuera de la media query y tapaba el tema.
+   -------------------------------------------------------------------------- */
+@media (prefers-color-scheme: dark) {
+  :root {
+    --color-bg: #18181b;
+    --color-bg-subtle: #27272a;
+    --color-bg-subtle-2: #3f3f46;
+    --color-surface: #18181b;
+    --color-border-subtle: #3f3f46;
+    --color-border-default: #a1a1aa; /* 6.92:1 */
+    --color-text-primary: #f4f4f5; /* 16.12:1 */
+    --color-text-secondary: #a1a1aa; /* 6.92:1 */
+    --color-text-disabled: #52525b;
+    --color-accent: #2563eb;
+    --color-on-accent: #ffffff;
+    --color-accent-emphasis: #60a5fa; /* 6.97:1 */
+    --color-accent-subtle-bg: #1e3a8a;
+    --color-accent-subtle-text: #bfdbfe; /* 7.29:1 sobre --color-accent-subtle-bg */
+    --color-danger: #f87171; /* 6.41:1 */
+    --shadow-xs: 0 1px 2px rgb(0 0 0 / 45%);
+  }
+}
+
+/* -----------------------------------------------------------------------------
+   Base
+   -------------------------------------------------------------------------- */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
   -webkit-text-size-adjust: 100%;
-}
-
-a {
-  font-weight: 500;
-  color: #646cff;
-  text-decoration: inherit;
-}
-a:hover {
-  color: #535bf2;
 }
 
 body {
   margin: 0;
-  display: flex;
-  place-items: center;
-  min-width: 320px;
   min-height: 100vh;
-  background-color:#242424;
+  /* D8/D12/D17: derivado del token, jamas un color literal. */
+  background-color: var(--color-bg);
+  color: var(--color-text-primary);
+  font-family: var(--font-sans);
+  font-size: var(--text-base-size);
+  line-height: var(--text-base-lh);
+  font-weight: var(--font-normal);
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
 }
 
 h1 {
-  font-size: 3.2em;
-  line-height: 1.1;
+  margin: 0;
+  font-size: var(--text-2xl-size);
+  line-height: var(--text-2xl-lh);
+  font-weight: var(--font-semibold);
 }
 
-button {
-  border-radius: 8px;
-  border: 1px solid transparent;
-  padding: 0.6em 1.2em;
-  font-size: 1em;
-  font-weight: 500;
+p {
+  margin: 0;
+}
+
+img {
+  max-width: 100%;
+}
+
+/* D11: una sola regla de foco, nunca se retira sin reemplazo (design-spec §2.4). */
+:focus-visible {
+  outline: var(--focus-ring-width) solid var(--color-accent-emphasis);
+  outline-offset: var(--focus-ring-offset);
+}
+
+:focus:not(:focus-visible) {
+  outline: none;
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* -----------------------------------------------------------------------------
+   Layout
+   -------------------------------------------------------------------------- */
+.app {
+  /* C1: el gutter lateral se define una sola vez y nunca con el atajo
+     `padding`, para que no pueda quedar a cero por accidente. */
+  padding-inline: var(--space-4);
+  padding-block: var(--space-8);
+}
+
+.screen {
+  max-width: 720px;
+  margin-inline: auto;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5);
+}
+
+.screen__toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+}
+
+.screen__content {
+  /* Misma altura minima en loading, cargado, vacio y error: el contenedor no
+     salta entre estados (design-spec §4, "lo que no debe pasar"). Diez filas
+     es el tamano de pagina por defecto. */
+  min-height: calc(var(--row-height) * 10 + var(--space-2) * 9);
+}
+
+.status-message {
+  color: var(--color-text-secondary);
+  font-size: var(--text-sm-size);
+  line-height: var(--text-sm-lh);
+}
+
+/* -----------------------------------------------------------------------------
+   Lista, vacio y esqueleto
+   -------------------------------------------------------------------------- */
+.todo-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.todo-list__item {
+  color: var(--color-text-primary);
+  font-size: var(--text-base-size);
+  line-height: var(--text-base-lh);
+  padding-block: var(--space-1);
+  border-bottom: 1px solid var(--color-border-subtle);
+  overflow-wrap: anywhere;
+}
+
+.empty-state {
+  color: var(--color-text-secondary);
+  font-size: var(--text-base-size);
+  text-align: center;
+  padding-block: var(--space-8);
+}
+
+.skeleton-row {
+  /* Misma caja que .todo-list__item —padding y separador incluidos— para que
+     loading y cargado midan lo mismo con el mismo tamano de pagina. */
+  display: flex;
+  align-items: center;
+  padding-block: var(--space-1);
+  border-bottom: 1px solid transparent;
+}
+
+.skeleton-bar {
+  display: block;
+  height: var(--text-base-lh);
+  border-radius: var(--radius-sm);
+  background-image: linear-gradient(
+    90deg,
+    var(--color-bg-subtle) 0%,
+    var(--color-bg-subtle-2) 50%,
+    var(--color-bg-subtle) 100%
+  );
+  background-size: 200% 100%;
+  animation: skeleton-shimmer 1.4s linear infinite;
+}
+
+@keyframes skeleton-shimmer {
+  from {
+    background-position: 200% 0;
+  }
+  to {
+    background-position: -200% 0;
+  }
+}
+
+/* -----------------------------------------------------------------------------
+   Error
+   -------------------------------------------------------------------------- */
+.error-banner {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  padding: var(--space-4);
+  /* Fondo neutro, no teñido: un fondo rojo claro complica el contraste. */
+  background-color: var(--color-surface);
+  border-inline-start: 4px solid var(--color-danger);
+  border-radius: var(--radius-sm);
+}
+
+.error-banner__message {
+  color: var(--color-danger);
+  font-size: var(--text-sm-size);
+  line-height: var(--text-sm-lh);
+}
+
+/* -----------------------------------------------------------------------------
+   Controles
+   -------------------------------------------------------------------------- */
+.button,
+.pagination__button {
+  min-width: var(--control-size);
+  min-height: var(--control-size);
+  padding-inline: var(--space-3);
+  border: 1px solid var(--color-border-default);
+  border-radius: var(--radius-sm);
+  background-color: var(--color-surface);
+  color: var(--color-text-primary);
   font-family: inherit;
-  background-color: #1a1a1a;
+  font-size: var(--text-sm-size);
+  line-height: var(--text-sm-lh);
+  font-weight: var(--font-medium);
   cursor: pointer;
-  transition: border-color 0.25s;
-}
-button:hover {
-  border-color: #646cff;
-}
-button:focus,
-button:focus-visible {
-  outline: 4px auto -webkit-focus-ring-color;
+  transition: background-color 120ms ease-out;
 }
 
-@media (prefers-color-scheme: light) {
+.button:hover,
+.pagination__button:hover:not(:disabled) {
+  background-color: var(--color-bg-subtle);
+}
+
+.button:active,
+.pagination__button:active:not(:disabled) {
+  background-color: var(--color-bg-subtle-2);
+  transition: none; /* feedback inmediato */
+}
+
+.pagination__button:disabled {
+  color: var(--color-text-disabled);
+  border-color: var(--color-text-disabled);
+  cursor: not-allowed;
+}
+
+.pagination__button[aria-current='page'] {
+  background-color: var(--color-accent-subtle-bg);
+  color: var(--color-accent-subtle-text);
+  /* Borde de 2px: el relleno solo no basta como indicador en modo oscuro. */
+  border: 2px solid var(--color-accent-emphasis);
+  font-weight: var(--font-semibold);
+}
+
+.page-size {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-size: var(--text-sm-size);
+  line-height: var(--text-sm-lh);
+}
+
+.page-size label {
+  color: var(--color-text-secondary);
+  font-weight: var(--font-normal);
+}
+
+.page-size__select,
+.page-jump-select {
+  min-height: var(--control-size);
+  padding-inline: var(--space-2);
+  border: 1px solid var(--color-border-default);
+  border-radius: var(--radius-sm);
+  background-color: var(--color-surface);
+  color: var(--color-text-primary);
+  font-family: inherit;
+  font-size: var(--text-sm-size);
+  cursor: pointer;
+}
+
+.page-size__select:disabled,
+.page-jump-select:disabled {
+  color: var(--color-text-disabled);
+  border-color: var(--color-text-disabled);
+  cursor: not-allowed;
+}
+
+/* -----------------------------------------------------------------------------
+   Barra de paginacion
+   -------------------------------------------------------------------------- */
+.pagination__list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  /* C1: con hasta 11 controles la fila no cabe en pantallas medias. Envolver
+     es preferible a desbordar; el algoritmo de la ventana no cambia. */
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+}
+
+.pagination__item {
+  display: flex;
+}
+
+.pagination__button--edge {
+  padding-inline: var(--space-2);
+  font-size: var(--text-base-size);
+}
+
+.pagination__ellipsis {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: var(--space-6);
+  min-height: var(--control-size);
+  color: var(--color-text-secondary);
+  user-select: none;
+}
+
+/* >=480px el salto directo no se muestra: los numeros ya dan acceso directo. */
+.pagination__item--jump {
+  display: none;
+}
+
+/* -----------------------------------------------------------------------------
+   Modo compacto <480px (design-spec §5)
+   4 botones icono de 44px + 3 huecos de 8px = 200px <= 288px disponibles a 320px.
+   -------------------------------------------------------------------------- */
+@media (max-width: 479px) {
   :root {
-    color: #e6e6e6;
-    background-color: #ffffff;
+    --control-size: 44px; /* objetivo tactil */
   }
-  a:hover {
-    color: #747bff;
+
+  /* Se oculta el <li> entero, no solo el boton: un contenedor vacio sigue
+     consumiendo el `gap` de la fila y dejaba un hueco entre los iconos. */
+  .pagination__item--page {
+    display: none;
   }
-  button {
-    background-color: #f9f9f9;
+
+  .pagination__item--jump {
+    display: flex;
+    /* Fila propia. `order` separa la posicion visual del orden del DOM a
+       proposito: el design-spec §6 exige que en tabulacion siga entre
+       "Anterior" y "Siguiente", y §5 que se vea en su propia fila. */
+    order: 1;
+    flex-basis: 100%;
+    justify-content: center;
+  }
+
+  .pagination__button--edge {
+    min-width: 44px;
+    padding-inline: var(--space-2);
+  }
+
+  .page-jump-select {
+    width: min(100%, 220px);
+    min-height: 44px;
+    white-space: normal;
+  }
+
+  /* §6: en compacto el resumen deja de verse (su sitio lo ocupa el salto
+     directo) pero sigue en el DOM anunciando con el mismo texto. Repite las
+     declaraciones de .sr-only porque el breakpoint no lo puede decidir React. */
+  .status-message {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+    border: 0;
+  }
+
+  .screen__toolbar {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .page-size {
+    justify-content: space-between;
+  }
+
+  .page-size__select {
+    min-width: 44px;
+  }
+}
+
+/* -----------------------------------------------------------------------------
+   B6 — prefers-reduced-motion (design-spec §6)
+   Se anula el unico movimiento continuo, el shimmer. Las transiciones de color
+   de 120ms se mantienen: son cambio de color, no movimiento.
+   -------------------------------------------------------------------------- */
+@media (prefers-reduced-motion: reduce) {
+  .skeleton-bar {
+    animation: none;
+    background-image: none;
+    background-color: var(--color-bg-subtle);
   }
 }
