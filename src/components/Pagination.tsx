@@ -1,5 +1,6 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import type { MouseEvent } from 'react';
+import { useTodos } from '../hooks/useTodos';
 import type { Todo } from '../types';
 import '../style/style.css';
 
@@ -20,7 +21,9 @@ const renderData = (data: Todo[]) => {
 };
 
 const Pagination = () => {
-  const [data, setData] = useState<Todo[]>([]);
+  // T-09: el fetch en linea se sustituye por el seam de datos. `loading` y
+  // `error` todavia no se pintan: la UI de estados llega en T-10.
+  const { data } = useTodos();
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPage, setItemsPage] = useState(5);
 
@@ -57,12 +60,6 @@ const Pagination = () => {
       return null;
     }
   });
-
-  useEffect(() => {
-    fetch('https://jsonplaceholder.typicode.com/todos')
-      .then((response) => response.json() as Promise<Todo[]>)
-      .then((json) => setData(json));
-  }, []);
 
   const haddleNext = () => {
     setCurrentPage(currentPage + 1);
