@@ -2,7 +2,7 @@ import { useEffect, useRef } from 'react';
 import { ELLIPSIS, getPageRange } from '../lib/pagination';
 import { PageJumpSelect } from './PageJumpSelect';
 
-export interface PaginationControlsProps {
+interface PaginationControlsProps {
   currentPage: number;
   totalPages: number;
   /** Durante la carga inicial no hay pagina actual: todos los controles se apagan. */
@@ -124,13 +124,16 @@ export function PaginationControls({
 
         {slots.map((slot, index) =>
           slot === ELLIPSIS ? (
-            <li key={`ellipsis-${String(index)}`} className="pagination__item">
+            <li
+              key={`ellipsis-${String(index)}`}
+              className="pagination__item pagination__item--page"
+            >
               <span className="pagination__ellipsis" aria-hidden="true">
                 …
               </span>
             </li>
           ) : (
-            <li key={`page-${String(slot)}`} className="pagination__item">
+            <li key={`page-${String(slot)}`} className="pagination__item pagination__item--page">
               <button
                 type="button"
                 className="pagination__button pagination__button--page"

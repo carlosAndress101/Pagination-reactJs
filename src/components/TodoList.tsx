@@ -1,6 +1,6 @@
 import type { Todo } from '../types';
 
-export interface TodoListProps {
+interface TodoListProps {
   items: Todo[];
 }
 

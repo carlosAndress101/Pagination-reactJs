@@ -6,7 +6,7 @@
  * ni `role="group"`: alert crearia una segunda region viva —lo que el spec
  * prohibe expresamente— y group no aporta nada sobre un `<div>`.
  */
-export interface ErrorBannerProps {
+interface ErrorBannerProps {
   message: string;
   onRetry: () => void;
 }

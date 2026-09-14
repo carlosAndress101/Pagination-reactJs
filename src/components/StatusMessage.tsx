@@ -6,7 +6,7 @@
  * El texto es el mismo en cualquier ancho; en compacto se oculta visualmente
  * (`sr-only`) pero sigue existiendo y anunciando.
  */
-export interface StatusMessageProps {
+interface StatusMessageProps {
   /** Texto ya compuesto por la pantalla. */
   children: string;
   /** En <480px el resumen deja de ser visible; su sitio lo ocupa el salto directo. */

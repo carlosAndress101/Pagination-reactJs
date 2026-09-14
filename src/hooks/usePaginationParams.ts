@@ -11,7 +11,7 @@ import type { PageParams } from '../lib/params';
  * se conoce cuando hay datos) ni reinicia la pagina al cambiar el tamano.
  * Esas decisiones son de la pantalla, en T-10.
  */
-export interface PaginationParamsApi extends PageParams {
+interface PaginationParamsApi extends PageParams {
   /** Actualiza uno o los dos parametros y empuja una entrada al historial. */
   setParams: (next: Partial<PageParams>) => void;
 }

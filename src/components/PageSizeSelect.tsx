@@ -1,7 +1,7 @@
 import { PAGE_SIZES } from '../lib/params';
 import type { PageSize } from '../lib/params';
 
-export interface PageSizeSelectProps {
+interface PageSizeSelectProps {
   value: PageSize;
   disabled: boolean;
   onChange: (next: PageSize) => void;

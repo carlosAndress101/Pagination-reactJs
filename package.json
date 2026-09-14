@@ -13,6 +13,7 @@
     "typecheck": "tsc --noEmit -p tsconfig.json && tsc --noEmit -p tsconfig.node.json",
     "typecheck:e2e": "tsc --noEmit -p tsconfig.e2e.json",
     "test": "vitest run",
+    "screenshots": "node scripts/screenshots.mjs",
     "verify:size": "node scripts/check-bundle-size.mjs",
     "verify:runtime": "pnpm typecheck:e2e && playwright test",
     "verify": "pnpm lint && pnpm format && pnpm typecheck && pnpm test && pnpm build && pnpm verify:size && pnpm verify:runtime"

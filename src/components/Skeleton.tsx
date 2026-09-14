@@ -5,7 +5,7 @@
  * Los anchos varian de forma determinista por indice, no aleatoria: asi la
  * captura es estable entre ejecuciones y se puede afirmar sobre ella en tests.
  */
-export interface SkeletonProps {
+interface SkeletonProps {
   rows: number;
 }
 

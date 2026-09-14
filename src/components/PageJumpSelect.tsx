@@ -5,7 +5,7 @@
  * No lleva `aria-live` propio: al cambiar dispara el mismo cambio de pagina que
  * un boton de numero, y quien anuncia es la region unica de StatusMessage.
  */
-export interface PageJumpSelectProps {
+interface PageJumpSelectProps {
   currentPage: number;
   totalPages: number;
   disabled: boolean;

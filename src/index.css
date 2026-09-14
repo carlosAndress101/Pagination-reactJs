@@ -404,8 +404,9 @@ img {
     --control-size: 44px; /* objetivo tactil */
   }
 
-  .pagination__button--page,
-  .pagination__ellipsis {
+  /* Se oculta el <li> entero, no solo el boton: un contenedor vacio sigue
+     consumiendo el `gap` de la fila y dejaba un hueco entre los iconos. */
+  .pagination__item--page {
     display: none;
   }
 

@@ -1,7 +1,16 @@
-# Build Pagination component from scratch in React JS
+# Lista de tareas paginada
 
-![Pagination Component](https://user-images.githubusercontent.com/63275338/235771441-705de613-40e1-4b7d-b5cf-96bb12035f8f.jpg)
-![Pagination Component](https://user-images.githubusercontent.com/63275338/235772034-584fd245-3bcd-443e-a02e-61afd16a8962.png)
+Demo de paginacion en React sobre 200 tareas de JSONPlaceholder: navegacion
+accesible por teclado, estado en la URL, tema claro y oscuro, y una variante
+compacta para movil.
+
+| Escritorio                                                    | Compacto (320px)                                          |
+| ------------------------------------------------------------- | --------------------------------------------------------- |
+| ![Escritorio, tema claro](screenshots/escritorio-claro.png)   | ![Compacto, tema claro](screenshots/compacto-claro.png)   |
+| ![Escritorio, tema oscuro](screenshots/escritorio-oscuro.png) | ![Compacto, tema oscuro](screenshots/compacto-oscuro.png) |
+
+Las capturas se generan con `pnpm screenshots` desde el build de produccion y
+con datos fijos, asi que se pueden regenerar cuando la UI cambie.
 
 ## Desarrollo
 
@@ -23,6 +32,7 @@ antes de dar nada por terminado:
 | `pnpm format`         | Prettier en modo `--check`                                                    |
 | `pnpm typecheck`      | TypeScript strict sobre `src/` y sobre la configuración de build              |
 | `pnpm test`           | Vitest: lógica pura, hooks e interacción con jsdom                            |
+| `pnpm screenshots`    | Regenera las capturas del README (no forma parte de `pnpm verify`)            |
 | `pnpm build`          | Build de producción                                                           |
 | `pnpm verify:size`    | Presupuesto de bundle en bytes, gzip nivel 9                                  |
 | `pnpm verify:runtime` | Playwright: layout, contraste, foco, objetivos táctiles y movimiento reducido |
