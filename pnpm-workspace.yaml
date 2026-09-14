@@ -1,8 +1,8 @@
-# DEC-03 (ORCHESTRATOR): scripts de build de dependencias bloqueados deliberadamente.
-# Evidencia: `pnpm build` es verde con ambos en false — @swc/core y esbuild entregan
-# binario precompilado vía optionalDependency, su postinstall no es necesario aquí.
-# Menos scripts ejecutados en install = menos superficie de supply chain.
-# Revisar si el Architect cambia el toolchain (p. ej. Vite 7 / Rolldown).
-allowBuilds:
-  '@swc/core': false
-  esbuild: false
+# DEC-03 (ORCHESTRATOR, actualizada en T-05): allowlist explicita de scripts de build.
+# Ningun paquete del toolchain actual necesita postinstall: los binarios nativos de
+# rolldown / lightningcss / oxlint llegan por optionalDependencies ya compilados.
+# Las entradas '@swc/core' y 'esbuild' se eliminaron al pasar a Vite 8 + @vitejs/plugin-react:
+# @swc/core solo entraba por plugin-react-swc, y Vite 8 usa rolldown en lugar de esbuild.
+# Se conserva la clave como allowlist: cualquier paquete futuro con script de build debe
+# declararse aqui de forma explicita.
+allowBuilds: {}

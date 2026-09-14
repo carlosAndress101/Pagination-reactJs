@@ -22,25 +22,23 @@
   color: black;
 }
 
-
-.pageNumbers li button{
-    background-color: transparent;
-    border: none;
-    color: white;
-    font-size: 1.5rem;
-    cursor: pointer;
-    
+.pageNumbers li button {
+  background-color: transparent;
+  border: none;
+  color: white;
+  font-size: 1.5rem;
+  cursor: pointer;
 }
 
-.pageNumbers li button:hover{
-    background-color: white;
-    color: black;
+.pageNumbers li button:hover {
+  background-color: white;
+  color: black;
 }
 
-.pageNumbers li button:focus{
-    outline: none;
+.pageNumbers li button:focus {
+  outline: none;
 }
 
-li{
-    list-style: none;
+li {
+  list-style: none;
 }

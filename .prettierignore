@@ -1,0 +1,10 @@
+node_modules
+dist
+coverage
+playwright-report
+test-results
+pnpm-lock.yaml
+
+# Documentos de ARCHITECT / DESIGNER / ORCHESTRATOR: prosa y tablas de otros agentes.
+# Reformatearlas generaria diffs enormes en archivos que el ENGINEER no posee.
+docs

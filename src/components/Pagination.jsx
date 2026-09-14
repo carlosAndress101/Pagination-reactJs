@@ -1,6 +1,6 @@
-import { useState } from "react";
-import { useEffect } from "react";
-import "../style/style.css";
+import { useState } from 'react';
+import { useEffect } from 'react';
+import '../style/style.css';
 const renderData = (data) => {
   return (
     <ul>
@@ -40,7 +40,7 @@ const Pagination = () => {
           key={number}
           id={number}
           onClick={haddleClick}
-          className={currentPage == number ? "active" : null}
+          className={currentPage == number ? 'active' : null}
         >
           {number}
         </li>
@@ -51,7 +51,7 @@ const Pagination = () => {
   });
 
   useEffect(() => {
-    fetch("https://jsonplaceholder.typicode.com/todos")
+    fetch('https://jsonplaceholder.typicode.com/todos')
       .then((response) => response.json())
       .then((json) => setData(json));
   }, []);
@@ -75,18 +75,18 @@ const Pagination = () => {
   };
 
   let pageIncrementBtn = null;
-  if(pages.length > maxNumberLimit){
+  if (pages.length > maxNumberLimit) {
     pageIncrementBtn = <li onClick={haddleNext}> &hellip; </li>;
   }
-  
+
   let pageDecrementBtn = null;
-  if(minPageNumberLimit >= 1){
+  if (minPageNumberLimit >= 1) {
     pageDecrementBtn = <li onClick={haddlePrev}> &hellip; </li>;
   }
 
-  const haddleLoadMore = () =>{
-    setItemsPage(itemsPage + 5)
-  }
+  const haddleLoadMore = () => {
+    setItemsPage(itemsPage + 5);
+  };
 
   return (
     <>
@@ -94,16 +94,25 @@ const Pagination = () => {
       {renderData(currentItems)}
       <ul className="pageNumbers">
         <li>
-          <button onClick={haddlePrev} disabled={currentPage== pages[0] ? true : false}>Prev</button>
+          <button onClick={haddlePrev} disabled={currentPage == pages[0] ? true : false}>
+            Prev
+          </button>
         </li>
         {pageDecrementBtn}
         {renderPageNumbers}
         {pageIncrementBtn}
         <li>
-          <button onClick={haddleNext} disabled={currentPage == pages[pages.length -1] ? true : false}>Next</button>
+          <button
+            onClick={haddleNext}
+            disabled={currentPage == pages[pages.length - 1] ? true : false}
+          >
+            Next
+          </button>
         </li>
       </ul>
-      <button className="loadmore" onClick={haddleLoadMore}>Load More</button>
+      <button className="loadmore" onClick={haddleLoadMore}>
+        Load More
+      </button>
     </>
   );
 };

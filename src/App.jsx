@@ -1,15 +1,14 @@
-import './App.css'
-import Pagination from './components/Pagination'
+import './App.css';
+import Pagination from './components/Pagination';
 
 function App() {
-
   return (
-    <div className='App'>
+    <div className="App">
       <div className="App-header">
-      <Pagination/>
+        <Pagination />
       </div>
     </div>
-  )
+  );
 }
 
-export default App
+export default App;
