@@ -1,30 +1,38 @@
-import { useState } from 'react';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
+import type { MouseEvent } from 'react';
+import type { Todo } from '../types';
 import '../style/style.css';
-const renderData = (data) => {
+
+/**
+ * D13 corregido: antes era un `useState` cuyo setter no se invocaba nunca.
+ * Es una constante, no estado.
+ */
+const PAGE_NUMBER_LIMIT = 5;
+
+const renderData = (data: Todo[]) => {
   return (
     <ul>
-      {data.map((todo, index) => {
-        return <li key={index}>{todo.title}</li>;
+      {data.map((todo) => {
+        return <li key={todo.id}>{todo.title}</li>;
       })}
     </ul>
   );
 };
 
 const Pagination = () => {
-  const [data, setData] = useState([]);
+  const [data, setData] = useState<Todo[]>([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPage, setItemsPage] = useState(5);
 
-  const [pageNumberLimit, setPageNumberLimit] = useState(5);
   const [maxNumberLimit, setMaxPageNumberLimit] = useState(5);
   const [minPageNumberLimit, setMinPageNumberLimit] = useState(0);
 
-  const haddleClick = (event) => {
-    setCurrentPage(Number(event.target.id));
+  const haddleClick = (event: MouseEvent<HTMLLIElement>) => {
+    const id = event.target instanceof Element ? event.target.id : undefined;
+    setCurrentPage(Number(id));
   };
 
-  const pages = [];
+  const pages: number[] = [];
 
   for (let i = 1; i <= Math.ceil(data.length / itemsPage); i++) {
     pages.push(i);
@@ -38,9 +46,9 @@ const Pagination = () => {
       return (
         <li
           key={number}
-          id={number}
+          id={String(number)}
           onClick={haddleClick}
-          className={currentPage == number ? 'active' : null}
+          className={currentPage === number ? 'active' : undefined}
         >
           {number}
         </li>
@@ -52,7 +60,7 @@ const Pagination = () => {
 
   useEffect(() => {
     fetch('https://jsonplaceholder.typicode.com/todos')
-      .then((response) => response.json())
+      .then((response) => response.json() as Promise<Todo[]>)
       .then((json) => setData(json));
   }, []);
 
@@ -60,17 +68,17 @@ const Pagination = () => {
     setCurrentPage(currentPage + 1);
 
     if (currentPage + 1 > maxNumberLimit) {
-      setMaxPageNumberLimit(maxNumberLimit + pageNumberLimit);
-      setMinPageNumberLimit(minPageNumberLimit + pageNumberLimit);
+      setMaxPageNumberLimit(maxNumberLimit + PAGE_NUMBER_LIMIT);
+      setMinPageNumberLimit(minPageNumberLimit + PAGE_NUMBER_LIMIT);
     }
   };
 
   const haddlePrev = () => {
     setCurrentPage(currentPage - 1);
 
-    if ((currentPage - 1) % pageNumberLimit == 0) {
-      setMaxPageNumberLimit(maxNumberLimit - pageNumberLimit);
-      setMinPageNumberLimit(minPageNumberLimit - pageNumberLimit);
+    if ((currentPage - 1) % PAGE_NUMBER_LIMIT === 0) {
+      setMaxPageNumberLimit(maxNumberLimit - PAGE_NUMBER_LIMIT);
+      setMinPageNumberLimit(minPageNumberLimit - PAGE_NUMBER_LIMIT);
     }
   };
 
@@ -94,7 +102,7 @@ const Pagination = () => {
       {renderData(currentItems)}
       <ul className="pageNumbers">
         <li>
-          <button onClick={haddlePrev} disabled={currentPage == pages[0] ? true : false}>
+          <button onClick={haddlePrev} disabled={currentPage === pages[0]}>
             Prev
           </button>
         </li>
@@ -102,10 +110,7 @@ const Pagination = () => {
         {renderPageNumbers}
         {pageIncrementBtn}
         <li>
-          <button
-            onClick={haddleNext}
-            disabled={currentPage == pages[pages.length - 1] ? true : false}
-          >
+          <button onClick={haddleNext} disabled={currentPage === pages[pages.length - 1]}>
             Next
           </button>
         </li>

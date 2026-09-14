@@ -11,17 +11,12 @@
     "verbatimModuleSyntax": true,
     "noEmit": true,
     "skipLibCheck": true,
-
     "strict": true,
     "noUncheckedIndexedAccess": true,
     "noUnusedLocals": true,
     "noUnusedParameters": true,
     "noFallthroughCasesInSwitch": true,
     "noImplicitReturns": true,
-
-    "allowJs": true,
-    "checkJs": false,
-
     "types": ["vite/client"]
   },
   "include": ["src"]
