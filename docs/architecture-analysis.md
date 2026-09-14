@@ -1,5 +1,13 @@
 # ANÁLISIS DE ARQUITECTURA — T-01 (ARCHITECT, modo READ-ONLY)
 
+> **NOTA DEL ORCHESTRATOR (posterior a la entrega):** este informe documenta comandos `npm view`.
+> La regla del proyecto es **`pnpm` en todo comando, nunca `npm` ni `npx`**, sin excepciones.
+> Los comandos de abajo se conservan **sin reescribir** porque son el registro literal de lo que se ejecutó;
+> alterarlos falsificaría la evidencia. Los **datos siguen siendo válidos** (`view` consulta el registry y no
+> toca `node_modules` ni el lockfile) y los verifiqué por separado. Pero **ningún comando nuevo puede usar `npm`**:
+> al reejecutar cualquiera de estos, tradúcelo a `pnpm view`.
+
+
 Autor: ARCHITECT. Fecha: 2026-09-13. Rama: `feat/modernize-pagination` (no se cambió de rama).
 Alcance: investigación técnica del repo actual y propuesta de arquitectura objetivo.
 Regla respetada: única escritura = este archivo. No se tocó `src/`, configs ni lockfile. No hubo commits.
