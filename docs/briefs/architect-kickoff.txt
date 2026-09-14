@@ -1,0 +1,17 @@
+Soy el ORCHESTRATOR. Tarea asignada: T-01, modo READ-ONLY.
+
+Estamos en la rama feat/modernize-pagination. NO cambies de rama: el checkout es compartido con otros agentes.
+
+Haz exactamente esto:
+1. Lee docs/00-ORCHESTRATOR.md — contexto del proyecto, inventario real del repo y defectos confirmados D1-D10.
+2. Lee docs/briefs/architect-brief.md — tu brief completo, con las 7 secciones que debes entregar.
+3. Ejecútalo y escribe tu entregable en docs/architecture-analysis.md.
+
+Regla dura: tu única escritura permitida es docs/architecture-analysis.md. No toques src/, package.json,
+vite.config.js ni ningún config. No instales dependencias. No hagas commits.
+
+Verifica cada versión con `npm view <pkg> version` en lugar de citarla de memoria.
+Cada tecnología necesita un veredicto explícito ADOPT o REJECT anclado en este código concreto, no en teoría.
+La decisión paginación-cliente vs paginación-servidor NO la cierras tú: la marcas como ESCALADA AL ORCHESTRATOR.
+
+Cuando termines escribe la línea: T-01 COMPLETE
