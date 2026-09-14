@@ -329,3 +329,16 @@ Condiciones, ninguna bloqueante para el producto pero todas exigibles antes de c
 H6 no es una condición, es una corrección de cifra para quien lea DEC-14 en el futuro.
 
 T-14 COMPLETE — docs/audit-report.md listo para revisión del Orchestrator
+
+---
+
+> **Anotación del ORCHESTRATOR (T-16), posterior a este informe.** Se deja el texto tal cual se entregó; alterarlo
+> falsificaría la evidencia. Dos correcciones para quien lo lea en el futuro:
+>
+> 1. **§6 y H6 — las cifras 507 px y 480–539px quedan superadas.** Son correctas para la página 1, pero el ancho de
+>    la barra depende de la página activa. Medido el barrido completo en T-15: el peor caso es la última página, que
+>    pide **515 px** y envuelve hasta **547px**. La banda cubierta por `e2e/wrap.spec.ts` es 480–547px. Ver DEC-14.
+> 2. **§2, D18 — marcado CORREGIDO sin señalar que era el único defecto sin test de regresión.** Cerrado en T-15.
+>
+> El veredicto READY_WITH_CONDITIONS y los seis hallazgos se mantienen íntegros: ninguna de las dos correcciones
+> cambia una severidad ni añade un hallazgo nuevo.

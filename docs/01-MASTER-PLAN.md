@@ -81,15 +81,24 @@ reglas type-aware (`no-floating-promises`, `no-misused-promises`) es asumible. *
   fuera de la lista de defectos, corregido en T-11. Incumple WCAG 3.1.1: un lector de pantalla lee contenido español
   con fonética inglesa. Se registra como **D18** para que la auditoría lo cubra, con tarea T-11 y estado cerrado.
   No estaba en el inventario original porque los 17 defectos salieron de leer `src/`, y este vivía en `index.html`.
-- **DEC-14 — `flex-wrap` en la barra a 480–539px: aceptado y RATIFICADO por el DESIGNER en T-14.** Con 11 controles
+- **DEC-14 — `flex-wrap` en la barra a 480–547px: aceptado, RATIFICADO en T-14 y MEDIDO en T-15.** Con 11 controles
   (7 slots + 4 extremos) no caben en una fila por debajo de 540px. Envolver mantiene C1 sin tocar el algoritmo de
   la ventana, que el spec dice explícitamente que no debe cambiar con el viewport.
 
-  **Corregido tras la auditoría (hallazgo H6).** La redacción original decía «520 px necesarios» y «480–767px».
-  Ambas cifras eran estimaciones aritméticas mías (11×40 + 10×8) y ambas eran falsas. Medido en navegador real por
-  el Designer: el ancho necesario es **507 px** y el rango donde la barra envuelve de verdad es **480–539px** — a
-  partir de 540px cabe en una fila. Cuarto caso en este proyecto de una cifra estimada que no resistió una medición;
-  ver DEC-04. La solución era correcta, el alcance declarado no.
+  **Cifra final: 515 px necesarios, banda de envoltura 480–547px.** Historia de este número, que hizo falta tres
+  intentos para acertar:
+
+  1. Yo estimé «520 px» y «480–767px» con aritmética de servilleta (11×40 + 10×8). Falso.
+  2. El Designer midió en navegador y dio «507 px» y «480–539px» (H6). Correcto… para la página 1.
+  3. El Engineer barrió las 20 páginas y encontró que **el ancho depende de la página activa**, porque la ventana
+     de números cambia de forma. El peor caso es la última página (`1 … 16 17 18 19 20`, cuatro números de dos
+     dígitos seguidos): pide **515 px** y envuelve hasta **547px**.
+
+  **El modo de fallo del paso 2 no es el del paso 1, y es el más instructivo de los cinco de este proyecto.** El
+  Designer no estimó: midió, y midió bien. Lo que hizo fue generalizar **una sola muestra** de un valor que depende
+  de un parámetro que no había fijado. DEC-04 decía «medir, no estimar»; le falta la mitad, y queda dicha aquí:
+  **medir una vez no basta si el valor depende de algo que no controlaste.** Una medición sin barrido es una
+  estimación con mejor presentación.
 
 ## A.3 GATE 2 — cierre de la implementación (verificado por el ORCHESTRATOR)
 
@@ -207,7 +216,7 @@ revisión del veredicto y no del informe.
 | # | Sev. | Decisión | Dueño |
 |---|---|---|---|
 | H1 | — | Confirma T-02c con evidencia propia. Nada que hacer. | — |
-| H2 | P2 | **A T-15.** Se cierra el hueco con cobertura real en 480–539px. DEC-04 exige medir; el rango se estimó dos veces sin medirse. | ENGINEER |
+| H2 | P2 | **A T-15 — CERRADO.** Hueco cubierto en la banda real, 480–547px. DEC-04 exige medir; el rango se estimó dos veces sin medirse. | ENGINEER |
 | H3 | P2 | **A T-15.** Regenerar con una respuesta real y fija de JSONPlaceholder. Rotular las capturas como «ilustrativas» se rechaza: el objetivo del producto es parecer real, y una nota al pie no arregla una portada que enseña algo que la app nunca muestra. | ENGINEER |
 | H4 | P2 | **No remediable por ningún agente.** Se eleva al usuario como verificación humana. B4 queda como «correcto a nivel de árbol de accesibilidad, pendiente de confirmación audible». | USUARIO |
 | H5 | P3 | **No se remedia.** Riesgo dependiente de plataforma, no reproducido en dos métodos ni en dos modos de navegador. Tocar un control que funciona por un comportamiento que nadie ha observado aquí es exactamente el cambio que introduce el defecto siguiente. Se documenta como riesgo conocido y se cierra. | ORCHESTRATOR |
@@ -220,3 +229,77 @@ real. Se acepta conscientemente: afecta a una ruta alternativa (el salto directo
 la navegación principal sigue siendo por botones), el impacto sería navegación de más, no pérdida de datos ni de
 acceso, y la corrección a ciegas —diferir el `change`, o sustituir el `<select>` nativo— cambiaría un control
 accesible y probado por uno sin probar. Si alguien reproduce el fallo en Windows o Linux, se reabre.
+
+---
+
+## A.5 GATE 3 — T-16, validación final (ejecutada por el ORCHESTRATOR)
+
+Nada de lo que sigue se acepta por el informe de otro agente. Todo se volvió a ejecutar aquí.
+
+### Verificado de forma independiente
+
+| Qué | Cómo lo comprobé | Resultado |
+|---|---|---|
+| `pnpm verify` completo | Ejecutado por mí de punta a punta | **exit 0** |
+| Unitarios | vitest | 6 archivos, 122 tests |
+| Navegador | Playwright, 6 proyectos | 156 pasados, 15 saltados, 0 fallos |
+| Presupuesto | `verify:size` | JS 70 415 B · JS crudo 227 348 B · CSS 1 909 B, los tres dentro |
+| `src/` intacto en T-15 | `git diff b0c1f57..HEAD -- src/` | vacío: la remediación no tocó una línea de producción |
+| Fixture de capturas | `curl` a la API real + comparación de los 200 objetos en Python | **idéntico**, `delectus aut autem` |
+| Títulos inventados | grep sobre `scripts/screenshots.mjs` | 0 |
+| Dependencias de producción | `package.json` | `react`, `react-dom` — las mismas dos del primer día |
+| Captura compacta | Abierta y mirada | Texto real, página completa, barra y salto directo enteros |
+
+### El test de la banda es falsable — lo falsifiqué yo
+
+La condición que le puse al Engineer fue que el spec fallara si alguien quitaba el `flex-wrap`; un test que pasa
+con y sin la corrección no cierra nada. No me bastó con que lo afirmara. Puse `flex-wrap: nowrap` en
+`src/index.css:368` (`.pagination__list`), reconstruí y ejecuté el proyecto `banda`:
+
+```
+NOWRAP →  3 failed, 3 passed
+  480px  «la barra envuelve en vez de salirse»  FALLA
+  480px  «el documento no desborda»             FALLA
+  547px  «la barra envuelve en vez de salirse»  FALLA
+  547px  «el documento no desborda»             PASA
+```
+
+CSS restaurado (`git checkout`), `dist` reconstruido, árbol limpio.
+
+**El resultado confirma la trampa que el Engineer describió, exactamente.** A 547px el aserto de desbordamiento
+pasa con la barra rota, porque la fila va centrada y no llega al borde del viewport. Un spec que solo hubiera
+comprobado C1 en la banda habría dado verde sobre un layout roto. El aserto que cierra H2 es «ningún control se
+sale de la caja de la barra», no el de scroll horizontal — y eso solo se sabe habiendo intentado romperlo.
+
+### Hallazgo de T-15 que ningún aserto habría encontrado
+
+Regenerar las capturas con datos reales destapó un defecto que los datos inventados ocultaban: los títulos reales
+ocupan dos líneas, así que a 320×720 la barra de paginación salía **cortada por la mitad** en la portada del README.
+Los 20 títulos inventados eran todos de una línea. El defecto de presentación no lo creó la remediación: lo reveló.
+Segunda vez en este proyecto que un problema visual solo aparece **mirando la imagen**, no ejecutando la suite.
+
+### Estado de las cuatro condiciones de la auditoría
+
+| Condición | Estado |
+|---|---|
+| H2 — cobertura 480–547px | **CERRADA**, con test falsable verificado por mí |
+| H3 — capturas con datos reales | **CERRADA**, fixture idéntico a la API |
+| H5 — `<select>` en Windows/Linux | **ACEPTADA COMO RIESGO**, documentada, no corregida |
+| H4 — B4 por oído | **ABIERTA**. Única condición pendiente. No la puede cerrar ningún agente. |
+
+### Veredicto
+
+**COMPLETE, con una condición abierta que corresponde a una persona.**
+
+Los 18 defectos están corregidos y los 18 tienen ahora test de regresión —D18 era el último sin él y se cerró en
+T-15—. Los criterios A1–A6, B1–B3, B5, B6, C1, D1–D4 y E1 están verificados con evidencia ejecutable. **B4 está
+verificado hasta donde llega la automatización** (el árbol de accesibilidad de Chromium expone `live=polite`,
+`atomic=true` antes y después del cambio de página) y no más allá: que VoiceOver lo **pronuncie** no lo ha
+confirmado nadie, y este proyecto no va a firmar que sí.
+
+El producto no añadió una sola dependencia de producción. Tailwind, TanStack Router, TanStack Query, Zod y oxfmt
+se rechazaron con análisis, no por gusto, y la aplicación no los echa de menos.
+
+**Lo que este proyecto hizo mal cinco veces y merece constar por encima del resultado:** dar por buena una cifra
+que nadie había medido. Cuatro estimaciones aritméticas y una medición de muestra única, en cuatro agentes
+distintos, incluido el que escribió la regla de no hacerlo. La suite no lo detecta; solo lo detecta volver a medir.
