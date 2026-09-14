@@ -66,6 +66,7 @@ Estados: `BLOCKED` `READY` `IN_PROGRESS` `REVIEW` `FAILED` `NEEDS_REMEDIATION` `
 
 ## C. Reglas de la fase
 
+0. **`pnpm` en todo comando, nunca `npm` ni `npx`.** Sin excepciones, incluidas consultas de solo lectura (`pnpm view`, `pnpm dlx`, `pnpm exec`). Cualquier comando `npm` que aparezca en un doc de este repo está desactualizado.
 1. **Un commit por tarea**, Conventional Commits, con el ID de tarea en el asunto. Sin `git push`, sin tags.
 2. **Evidencia ejecutada y pegada** en cada entrega. "Funciona" sin salida de comando no se acepta.
 3. **Parada obligatoria en GATE 1.** No empezar T-10 sin mi revisión: es donde cambia el comportamiento visible.

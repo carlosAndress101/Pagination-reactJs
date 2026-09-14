@@ -25,7 +25,7 @@ Añade a tu sección 7 una validación explícita de:
 Regla dura: tu única escritura permitida es docs/architecture-analysis.md. No toques src/, package.json,
 vite.config.js ni ningún config. No hagas commits.
 
-Verifica cada versión con `npm view <pkg> version`, no de memoria. Runtime real instalado ahora mismo:
+Verifica cada versión con `ppnpm view <pkg> version`, no de memoria. Runtime real instalado ahora mismo:
 react 18.3.1, react-dom 18.3.1, vite 4.5.14, eslint 8.57.1 (deprecated).
 
 Cada tecnología necesita veredicto explícito ADOPT o REJECT anclado en este código. DEC-02 te restringe:

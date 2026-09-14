@@ -6,7 +6,7 @@ Owner: ARCHITECT. Asignado por: ORCHESTRATOR. Estado: IN_PROGRESS. Dependencias:
 NO modifiques ningún archivo dentro de `src/`, `package.json`, `vite.config.js`, `index.html` ni ningún
 config. Tu ÚNICA escritura permitida es crear `docs/architecture-analysis.md`.
 No instales dependencias. No ejecutes `npm install` / `pnpm install`. No hagas commits.
-Puedes leer archivos y consultar versiones publicadas en el registry (`npm view <pkg> version`).
+Puedes leer archivos y consultar versiones publicadas en el registry (`ppnpm view <pkg> version`).
 
 ## Contexto previo
 Lee primero `docs/00-ORCHESTRATOR.md`. Ya contiene el inventario del repo y 10 defectos confirmados (D1–D10).
@@ -15,7 +15,7 @@ No repitas ese inventario: constrúyelo encima.
 ## Lo que debes entregar en `docs/architecture-analysis.md`
 
 ### 1. Matriz de versiones objetivo
-Para cada uno: versión estable actual **verificada con `npm view <pkg> version`** (no de memoria), y compatibilidad entre sí.
+Para cada uno: versión estable actual **verificada con `ppnpm view <pkg> version`** (no de memoria), y compatibilidad entre sí.
 react, react-dom, typescript, vite, @vitejs/plugin-react-swc, tailwindcss (+ @tailwindcss/vite), vitest,
 @testing-library/react, jsdom o happy-dom, oxlint, oxfmt.
 Señala explícitamente cualquier incompatibilidad o riesgo (p. ej. Tailwind 4 requiere navegadores/PostCSS concretos,
@@ -69,7 +69,7 @@ es una respuesta válida, pero tiene que ser explícita.
 
 ## Criterios de aceptación de TU tarea
 - `docs/architecture-analysis.md` existe y cubre las 7 secciones.
-- Cada versión que cites viene de `npm view`, con el comando visible.
+- Cada versión que cites viene de `pnpm view`, con el comando visible.
 - Cada tecnología tiene veredicto explícito ADOPT o REJECT con razón anclada en este código.
 - La decisión cliente-vs-servidor queda marcada como escalada, no resuelta.
 - `git status` muestra que no tocaste nada fuera de `docs/`.

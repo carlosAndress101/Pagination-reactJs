@@ -145,6 +145,13 @@ runtime real: react 18.3.1, react-dom 18.3.1, vite 4.5.14, eslint 8.57.1 (deprec
   pnpm 12.3.4 rechazó el lockfile versionado (`lockfileVersion 6.0` incompatible, `[WARN] Ignoring broken lockfile`)
   y lo re-resolvió entero desde `package.json` (+2029 −1177 líneas, ahora `9.0`). El churn era inevitable y ya ocurrió.
   pnpm se mantiene por estar instalado y ser el gestor de origen del proyecto, no por preservar el lockfile.
+
+  **REGLA SIN EXCEPCIONES (reforzada por el usuario, "muy importante"): `pnpm` en TODO comando, nunca `npm` ni `npx`.**
+  Incluye las consultas de solo lectura: `pnpm view <pkg> version` (no `npm view`), `pnpm why`, `pnpm dlx` (no `npx`),
+  `pnpm exec`. La incumplieron por separado el ORCHESTRATOR (al verificar la matriz de versiones) y el ARCHITECT
+  (en toda la §1 de su informe). Los datos obtenidos siguen siendo válidos —`view` no altera el árbol de
+  dependencias ni el lockfile— pero **ningún comando nuevo puede usar `npm`**. Si un brief o un doc de este
+  repositorio muestra un comando `npm`, está desactualizado: tradúcelo antes de ejecutarlo.
 - **DEC-02 (AMPLIADA) — Cobertura de lint: a11y **y** corrección estricta, obligatorias.** Cualquier stack de lint
   propuesto debe cubrir (a) reglas de accesibilidad en JSX y (b) reglas de corrección estricta, `eqeqeq` incluida.
   Motivo ampliado: el linter actual detecta 1 de 17 defectos. D3/D11/D14 se cuelan por falta de a11y y **D6 se cuela
