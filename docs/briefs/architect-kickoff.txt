@@ -34,4 +34,8 @@ el stack de lint elegido debe cubrir reglas de a11y en JSX Y corrección estrict
 La decisión paginación-cliente vs paginación-servidor NO la cierras tú: la analizas, recomiendas, y la marcas
 como ESCALADA AL ORCHESTRATOR.
 
+Restricción dura para tu sección 7 (DEC-05): el andamiaje de verificación en runtime debe vivir en el repo y ser
+reejecutable por otro agente mediante un script de package.json, con servidor y navegador gestionados por el propio
+runner. Scripts sueltos en un scratchpad no valen. Está detallado en el brief.
+
 Cuando termines escribe la línea: T-01 COMPLETE

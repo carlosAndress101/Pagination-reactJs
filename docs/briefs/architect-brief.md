@@ -55,6 +55,18 @@ oxlint/oxfmt inmaduros, StrictMode y doble fetch, `node_modules` ausente.
 Qué comando prueba qué criterio de aceptación de `docs/00-ORCHESTRATOR.md` §4. Señala qué criterios NO quedan cubiertos
 por ningún comando automático y necesitan verificación manual.
 
+**RESTRICCIÓN DURA (DEC-05) — el andamiaje de verificación vive en el repo y es reejecutable por otro agente.**
+La verificación en runtime de B5 (objetivos táctiles ≥44px), C1 (sin scroll horizontal a 320px) y contraste la escribe
+el ENGINEER y la reejecuta el DESIGNER en Audit Mode **sin preguntarle nada al Engineer**. Por tanto tu método debe ser
+un script de `package.json` que gestione por sí mismo el arranque del servidor y del navegador. Queda descartado de
+entrada lo que se usó en el baseline T-04: scripts sueltos en un scratchpad de sesión, un puerto elegido a mano y un
+navegador headless levantado a mano. Eso no es verificación reejecutable, es una anécdota irrepetible.
+
+Di explícitamente qué parte de B5/C1/contraste es comprobable en jsdom o happy-dom y qué parte exige un navegador real
+con layout de verdad — y si exige navegador real, qué dependencia concreta lo aporta y cuánto pesa. Si tu conclusión es
+que alguno de esos criterios no se puede automatizar de forma razonable, dilo y propón el procedimiento manual;
+es una respuesta válida, pero tiene que ser explícita.
+
 ## Criterios de aceptación de TU tarea
 - `docs/architecture-analysis.md` existe y cubre las 7 secciones.
 - Cada versión que cites viene de `npm view`, con el comando visible.

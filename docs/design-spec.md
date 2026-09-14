@@ -151,10 +151,14 @@ paginación que envuelve dos filas lógicas:
 **[AJUSTABLE] Tamaños de página**: `10, 20, 50, 100` (por defecto `10`). Con 200 ítems fijos esto da 20/10/4/2 páginas
 respectivamente. Es una recomendación de UI, no un valor bloqueante — el Orchestrator puede cambiar la lista.
 
-**[AJUSTABLE] Salto rápido ("ir a página X")**: **no lo incluyo**. Con `pageSize` mínimo 10, el máximo son 20 páginas,
-alcanzables en ≤3 clics combinando números + primera/última. Un input de texto añade validación (rango, no-numérico)
-sin beneficio proporcional a esa escala. Si el Orchestrator decide bajar el pageSize mínimo muy por debajo de 10, esta
-decisión debería revisarse.
+**[AJUSTABLE] Salto rápido ("ir a página X") — en `≥480px`**: **no lo incluyo**. Con los números visibles y
+`pageSize` mínimo 10, el máximo son 20 páginas, alcanzables en ≤3 clics combinando números + primera/última. Un input
+de texto añade validación (rango, no-numérico) sin beneficio proporcional a esa escala.
+
+En `<480px` esta misma justificación **no se sostiene**, porque ahí los números están ocultos y quedar solo con
+Primera/Última deja páginas intermedias a 11 toques de distancia (hallazgo T-02b del Orchestrator). Por eso el modo
+compacto sí lleva un mecanismo de salto directo — un `<select>` con una opción por página, no un input de texto — ver
+el detalle y la justificación completa en §5, subsección "Salto directo en modo compacto (T-02b)".
 
 ### Algoritmo de ellipsis
 
@@ -291,9 +295,9 @@ ellos = `4×44 + 3×8 = 200px`. Ancho disponible a 320px con `padding` lateral d
 `320 − 32 = 288px`. `200px ≤ 288px` → sin scroll horizontal, con margen de sobra para el texto "Página X de Y" que
 va en su propia fila debajo, con `white-space: normal` (nunca `nowrap`) por si el número de página es de 2 dígitos.
 
-**Objetivo táctil**: en `<480px`, todo control interactivo (botones ícono, `<select>`) tiene `min-width: 44px;
-min-height: 44px`. En `≥480px` se permite `40×40px` (uso con ratón/trackpad), manteniendo el mismo padding interno
-relativo (`--space-2` `--space-3`).
+**Objetivo táctil**: en `<480px`, todo control interactivo (botones ícono, `<select>` de tamaño de página, `<select>`
+de salto directo) tiene `min-width: 44px; min-height: 44px`. En `≥480px` se permite `40×40px` (uso con
+ratón/trackpad), manteniendo el mismo padding interno relativo (`--space-2` `--space-3`).
 
 ---
 
@@ -311,27 +315,29 @@ relativo (`--space-2` `--space-3`).
 | Elipsis | `<span aria-hidden="true">…</span>` dentro de un `<li>`, nunca un `<button>` |
 | Botón "Siguiente" | `<button type="button" aria-label="Página siguiente">›</button>` |
 | Botón "Última" | `<button type="button" aria-label="Última página">»</button>` |
-| Resumen/anuncio | Un único `<p aria-live="polite" aria-atomic="true">` — ver siguiente punto |
+| Resumen/anuncio | Un único `<p aria-live="polite" aria-atomic="true">`, siempre presente (ver siguiente punto). En `≥480px` es visible; en `<480px` es visualmente oculto (`sr-only`), ya que en compacto la superficie visible de navegación pasa a ser el `<select>` de salto directo. |
+| `<select>` de salto directo (solo `<480px`, ver §5 T-02b) | `<select aria-label="Ir a la página">`, una `<option value="{n}">Página {n} de {N}</option>` por página, `selected` en la actual. No lleva `aria-live` propio: al cambiar, dispara el mismo cambio de página que un botón de número, y es el `<p>` oculto el que anuncia el resultado. |
 | Label + select de tamaño | `<label for="page-size">Filas por página</label>` + `<select id="page-size">` |
 | Botón "Reintentar" | `<button type="button">Reintentar</button>`, fuera de la región `aria-live` (para no repetirse en cada anuncio) |
 
 ### Una sola región `aria-live`, tres contenidos posibles
 
 Para evitar que dos regiones anuncien a la vez (dos lectores de pantalla hablando encima), el mismo nodo
-`aria-live="polite" aria-atomic="true"` se reutiliza según el estado:
+`aria-live="polite" aria-atomic="true"` se reutiliza según el estado, **con el mismo texto en cualquier ancho de
+pantalla** (a partir de T-02b ya no hay una versión corta solo para compacto — ver §5):
 
 - Cargando: `"Cargando resultados…"`
-- Cargado: `"Mostrando 11–20 de 200 resultados"` (texto literal exacto que además es el resumen visible permanente)
+- Cargado: `"Mostrando 11–20 de 200 resultados"` (texto literal exacto; en `≥480px` es además el resumen visible)
 - Error: `"No se pudieron cargar los resultados. Inténtalo de nuevo."`
 
-En `<480px` el mismo nodo cambia su contenido visible a `"Página 2 de 20"` pero el anuncio para lectores de pantalla
-sigue siendo la versión larga ("Mostrando…"), vía un `<span class="sr-only">` interno — así el móvil no pierde
-información en el anuncio por ahorrar espacio visual.
+En `<480px` este nodo sigue existiendo con el mismo texto, solo que oculto visualmente (`sr-only`) porque su lugar en
+pantalla lo ocupa el `<select>` de salto directo, que ya comunica la página actual a la vista.
 
 ### Orden de tabulación
 
 `(resumen, no focusable) → selector de tamaño → Primera → Anterior → [números en orden] → Siguiente → Última`.
-Orden natural del DOM, sin `tabindex` positivo en ningún punto.
+Orden natural del DOM, sin `tabindex` positivo en ningún punto. En `<480px`, `[números en orden]` se sustituye por
+el `<select>` de salto directo de T-02b, en la misma posición relativa (entre `Anterior` y `Siguiente`).
 
 ### Foco tras cambiar de página
 
