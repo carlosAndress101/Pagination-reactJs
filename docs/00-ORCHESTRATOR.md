@@ -157,6 +157,16 @@ runtime real: react 18.3.1, react-dom 18.3.1, vite 4.5.14, eslint 8.57.1 (deprec
 - **DEC-04 — Medir, no estimar.** Ningún defecto de layout, contraste o tamaño se da por confirmado sin medición real
   en navegador. Precedente: D16 y D8, donde el análisis estático falló en ambas direcciones (uno subestimado, otro falso positivo).
 
+- **DEC-05 — Titularidad de la verificación en runtime (B5, C1, contraste).** Dos pasadas, agentes distintos:
+  1. **ENGINEER — autoverificación, obligatoria.** Mide su propia implementación y escribe los tests de layout.
+     No es opcional ni un extra: §10 le exige reportar evidencia ejecutada. Un criterio de aceptación sin comando
+     que lo pruebe no está entregado.
+  2. **DESIGNER en AUDIT MODE — verificación independiente, es el gate.** Vuelve a medir sin dar por buena la
+     evidencia del Engineer. Quien escribe el código no puede ser quien certifica que cumple.
+  El **método** (herramienta, jsdom vs navegador real, qué es testeable automáticamente y qué exige comprobación
+  manual) lo define el **ARCHITECT** en la sección 7 de su informe, no el Orchestrator. DEC-05 reparte la
+  titularidad; el Architect decide el cómo.
+
 ## 3. PRODUCT DEFINITION
 
 Producto: **demo profesional de paginación** sobre una lista de tareas (200 ítems de JSONPlaceholder).
@@ -195,6 +205,11 @@ Fuera de scope (salvo aprobación explícita del Orchestrator): backend propio, 
 
 **E. Calidad**
 - E1 Sin dead code de plantilla. Sin abstracciones prematuras. D1–D10 corregidos o explícitamente descartados con motivo.
+
+### Input del ENGINEER para el Master Plan v2 (aceptado como input, no como plan)
+Trabajo que NO depende de la decisión cliente-vs-servidor y por tanto es paralelizable en cuanto haya Master Plan:
+D9 (limpieza de plantilla), D11/D12 (foco y colores), D16 (responsive) y el andamiaje de TS/lint/test.
+Ninguno toca la lógica de paginación. El orden lo fija el Master Plan a partir del informe del Architect.
 
 ## 5. Reglas para todos los agentes
 

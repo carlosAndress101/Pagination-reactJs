@@ -234,7 +234,57 @@ viewport, solo la densidad visual.
 |---|---|
 | `≥768px` (desktop) | Fila 1 (resumen + selector) y fila 2 (nav) en una sola fila horizontal si el ancho lo permite; si no, dos filas. Todos los números visibles según el algoritmo de §3. |
 | `480–767px` (tablet/móvil grande) | Fila 1 y fila 2 apiladas verticalmente. Números de página con el mismo algoritmo (hasta 7 slots), sin cambios. |
-| `<480px` (compacto, mínimo 320px) | **Se ocultan los botones numéricos.** Quedan solo `« Primera`, `‹ Anterior`, `Siguiente ›`, `Última »` como 4 botones ícono, más un texto central `"Página X de Y"` que sustituye visualmente al resumen largo (mismo nodo `aria-live`, texto adaptado — ver §6). El selector de tamaño de página baja a su propia fila, ancho completo. |
+| `<480px` (compacto, mínimo 320px) | **Se ocultan los botones numéricos.** Quedan `« Primera`, `‹ Anterior`, `Siguiente ›`, `Última »` como 4 botones ícono, más un `<select>` de salto directo (ver subsección siguiente) en vez de un texto plano. El selector de tamaño de página baja a su propia fila, ancho completo. |
+
+### Salto directo en modo compacto (T-02b)
+
+**Problema detectado por el Orchestrator, correcto:** ocultar los números y descartar el salto rápido eran dos
+decisiones defendibles por separado, pero juntas dejan en móvil solo dos destinos directos (`Primera`/`Última`). Con
+`pageSize=10` (20 páginas), llegar a la página 12 costaba 11 toques en "Siguiente". El razonamiento de "solo son 20
+páginas" en §3 asumía los números visibles; en la variante sin ellos, no se sostiene.
+
+**Fix:** en `<480px`, el texto plano `"Página X de Y"` se sustituye por un **`<select>` nativo de salto directo**,
+con una opción por página (`value={n}`, texto `"Página {n} de {N}"`), valor seleccionado = página actual:
+
+```html
+<select aria-label="Ir a la página" class="page-jump-select">
+  <option value="1">Página 1 de 20</option>
+  <option value="2">Página 2 de 20</option>
+  <!-- ... -->
+  <option value="20" selected>Página 20 de 20</option>
+</select>
+```
+
+Por qué esta opción y no las otras dos que planteaba el reto:
+
+- **Frente a un set numérico reducido de 3 slots**: sigue sin dar acceso directo a páginas lejanas (misma familia de
+  problema que intentaba resolver, a menor escala). El `<select>` da acceso a **cualquier** página en como máximo 2
+  toques, sin importar `N`.
+- **Frente a un input de texto libre**: un `<select>` con opciones fijas no introduce validación nueva (rango,
+  no-numérico, `page=abc`) — los valores ya están acotados a páginas reales, coherente con cómo se trata `pageSize`
+  en el resto del spec. Un input añadiría una superficie de error que el propio criterio A6 ya resuelve a nivel de
+  URL, sin necesidad de duplicarlo en la UI.
+- **Frente a bajar el breakpoint de 480px**: no resuelve nada, solo desplaza a qué ancho ocurre el mismo problema.
+
+Efecto secundario positivo: el `<select>` en un móvil real abre el picker nativo del sistema operativo, que ya
+soporta scroll y búsqueda por teclado en listas largas — no hay que construir ni testear un componente de lista
+propio para esto.
+
+**Ancho:** `width: min(100%, 220px)`, centrado en su propia fila, `min-height: 44px` (mismo objetivo táctil que el
+resto de controles en `<480px`, ver más abajo). No compite en ancho con la fila de los 4 botones ícono — sigue en una
+fila separada, así que el cálculo de 320px de más abajo no cambia.
+
+**Consecuencia en accesibilidad (toca §6):** el `<select>` deja de poder ser a la vez "resumen visible" y región
+`aria-live`, porque su contenido no es texto de lectura libre sino una lista de opciones. Se separan ambos roles: el
+`<select>` es la única superficie visible de navegación directa en compacto, y el anuncio de cambio de página pasa a
+vivir en un nodo `aria-live` visualmente oculto (`sr-only`) que existe en todos los anchos con el mismo texto largo
+(`"Mostrando 11–20 de 200 resultados"`) — ver el mapa ARIA actualizado en §6. Esto además simplifica esa sección: ya
+no hace falta un "modo corto" del texto anunciado solo para compacto.
+
+**Sobre `pageSize=100` (2 páginas):** no lo elimino de la lista — sigue siendo una opción válida para quien quiera
+ver el caso de pocas páginas — pero mantengo el **valor por defecto en 10** (20 páginas) precisamente porque es el
+que se usa al entrar por primera vez, y es el que de verdad ejercita la paginación (incluido este mismo fix de salto
+directo) en la demo.
 
 **Verificación explícita a 320px** (evita volver a violar C1): 4 botones ícono de `44×44px` + 3 gaps de `8px` entre
 ellos = `4×44 + 3×8 = 200px`. Ancho disponible a 320px con `padding` lateral de `16px` a cada lado (`--space-4`) =
