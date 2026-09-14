@@ -222,7 +222,9 @@ está en el conjunto renderizado, nunca queda oculta detrás de un `…`.
 - **Error**: banner con borde izquierdo 4px `--color-danger`, fondo `--color-surface` (no un fondo teñido — evita el
   problema de contraste de fondos rojos claros, ver §2), texto del mensaje en `--color-danger`, y un botón
   "Reintentar" con estilo *outline* (borde `--color-border-default`, texto `--color-text-primary`, hover
-  `--color-bg-subtle`). Mismo `min-height` que loading/loaded.
+  `--color-bg-subtle`). Mismo `min-height` que loading/loaded. **Este banner es la única copia visible del mensaje**
+  (corregido en T-02c — ver la nota de visibilidad en §6: la región `aria-live` compartida lleva el mismo texto pero
+  queda oculta durante este estado, para no duplicarlo en pantalla en `≥480px`).
 - Lo que **no** debe pasar: (1) que el alto del contenedor cambie entre loading→loaded→error/empty; (2) que dos
   regiones `aria-live` anuncien a la vez (ver §6, es una sola región reutilizada); (3) animación de entrada/salida
   entre páginas — el contenido se reemplaza al instante (ver §7).
@@ -330,8 +332,13 @@ pantalla** (a partir de T-02b ya no hay una versión corta solo para compacto �
 - Cargado: `"Mostrando 11–20 de 200 resultados"` (texto literal exacto; en `≥480px` es además el resumen visible)
 - Error: `"No se pudieron cargar los resultados. Inténtalo de nuevo."`
 
-En `<480px` este nodo sigue existiendo con el mismo texto, solo que oculto visualmente (`sr-only`) porque su lugar en
-pantalla lo ocupa el `<select>` de salto directo, que ya comunica la página actual a la vista.
+**Visibilidad — corregida en T-02c.** En `<480px` este nodo existe siempre con el mismo texto, solo que oculto
+visualmente (`sr-only`), porque su lugar en pantalla lo ocupa el `<select>` de salto directo (en loading/cargado) o
+el banner de error (en error). En `≥480px` la visibilidad ya no depende solo del breakpoint, sino también del
+estado: en loading y cargado es visible (es el resumen de resultados en pantalla), pero **en error queda `sr-only`
+también en `≥480px`** — el texto ya se muestra una vez en el banner de §4, y mostrarlo también aquí lo duplicaba en
+pantalla. El nodo sigue existiendo y sigue disparando el anuncio para lectores de pantalla en los tres estados; lo
+único que cambia es que, durante el error, su copia visible se cede al banner.
 
 ### Orden de tabulación
 
@@ -339,14 +346,28 @@ pantalla lo ocupa el `<select>` de salto directo, que ya comunica la página act
 Orden natural del DOM, sin `tabindex` positivo en ningún punto. En `<480px`, `[números en orden]` se sustituye por
 el `<select>` de salto directo de T-02b, en la misma posición relativa (entre `Anterior` y `Siguiente`).
 
-### Foco tras cambiar de página
+### Foco tras cambiar de página (corregido en T-02c)
 
-**El foco se queda en el botón que el usuario activó.** No se mueve a la lista, ni al resumen, ni al primer ítem.
-Razón: los cuatro botones de extremo (Primera/Anterior/Siguiente/Última) están siempre presentes en el DOM, y el
-algoritmo de §3 garantiza que la página actual **siempre** forma parte del rango visible — por lo tanto el botón que
-se acaba de pulsar nunca desaparece del árbol tras el re-render. Mover el foco a otro sitio (p. ej. al inicio de la
-lista) rompería el flujo de quien pagina rápido con teclado repitiendo `Enter`/`Space` sobre "Siguiente". Excepción:
-si el usuario cambia el `<select>` de tamaño de página, el foco permanece en el propio `<select>` (no salta al nav).
+**Regla general: el foco se queda en el botón que el usuario activó.** No se mueve a la lista, ni al resumen, ni al
+primer ítem — eso rompería el flujo de quien pagina rápido con teclado repitiendo `Enter`/`Space`. Esta regla se
+concreta de dos formas distintas según el control, porque "seguir en el DOM" no es lo mismo que "poder conservar el
+foco": la primera versión de esta sección asumía que sí lo eran, y no se sostiene para los cuatro botones de extremo.
+
+- **Botones de número**: la regla general se cumple sin excepción. El botón de la página actual nunca es `disabled`
+  (§4) y el algoritmo de §3 garantiza que esa página **siempre** forma parte del rango visible — el foco nunca se
+  pierde.
+- **Primera / Anterior / Siguiente / Última**: cuando activar uno de estos deja al usuario en el extremo
+  correspondiente, ese mismo botón pasa a `disabled` — y un elemento que pasa a `disabled` **pierde el foco aunque
+  siga en el DOM**; el navegador lo manda al `body`, no se queda "cerca" de donde estaba. (jsdom no reproduce este
+  comportamiento — hay que verificarlo en navegador real, un test en verde sobre jsdom no lo confirma.) Cuando esto
+  ocurre — y solo cuando el foco se ha perdido de verdad tras el re-render, no de forma preventiva — se reubica en su
+  **control espejo**: `Siguiente → Anterior`, `Anterior → Siguiente`, `Última → Primera`, `Primera → Última`. El
+  espejo está garantizado habilitado en ese momento (acabas de alejarte de su extremo), así que nunca es en sí mismo
+  otro callejón sin salida. Se elige el espejo y no, por ejemplo, el `<select>` de tamaño de página, porque mantiene
+  el foco dentro del mismo clúster funcional y en la dirección semánticamente opuesta a la que el usuario acaba de
+  agotar.
+- Excepción ya existente, sin cambios: si el usuario cambia el `<select>` de tamaño de página, el foco permanece en
+  el propio `<select>` — ese control no se deshabilita nunca, así que el mecanismo de espejo no aplica ahí.
 
 ### `prefers-reduced-motion`
 

@@ -45,6 +45,66 @@ reglas type-aware (`no-floating-promises`, `no-misused-promises`) es asumible. *
   el modo compacto que crean T-10 y T-11; escribirlos antes sería escribirlos a ciegas contra una UI inexistente.
   Coincide con el paso 8 del orden del Architect. La ventana de paralelizarlo con la ola 1 ya pasó.
 
+## A.2 Decisiones posteriores a T-10
+
+- **DEC-10 — DEC-08 se expresa en BYTES y se comprueba por script, no a ojo.**
+  El aviso de T-10 ("71.33 kB gzip, rozando el límite de 72") fue una **falsa alarma por unidades**: se comparaba
+  el número que imprime Vite contra un umbral definido de otra forma. DEC-08 fija la línea base en **68 486 B**
+  medidos con `zlib` nivel 9 por script propio; Vite comprime con otro nivel y además reporta en kB **decimales**,
+  no KiB. Medido como el criterio manda, el bundle de T-10 son **70 392 B**, no 71 330.
+  Dos números que no se pueden comparar produjeron una alarma sin causa — y por la misma razón podrían haber
+  producido un aprobado sin causa.
+  **Umbrales redefinidos en bytes, sin ambigüedad:** aviso **72 000 B**, límite duro **75 000 B**.
+  Estado tras T-10: **70 392 B — por debajo del aviso.** No se sube el techo: no hacía falta.
+  Crecimiento real de T-05 a T-10: **+1 906 B** para pasar de 1 componente a 8 más `lib/` y `hooks/`. Proporcionado.
+  **La comprobación se automatiza**: T-12 añade el chequeo de tamaño a `pnpm verify`, midiendo con `zlib` nivel 9
+  y fallando por bytes. Un criterio que se verifica leyendo la salida de otra herramienta no es un criterio.
+- **DEC-11 — Dos conflictos del design-spec se resuelven ANTES de la auditoría, no en ella.** Se abre **T-02c**
+  (DESIGNER, en paralelo a T-11): (a) el foco tras deshabilitarse el control pulsado, que el razonamiento de §6
+  no cubría, y (b) el mensaje de error duplicado en pantalla por el choque entre §4 y §6. Ambos son contrato del
+  Designer. Descubrirlos en T-14 significaría rehacer trabajo ya auditado.
+
+- **DEC-12 — El presupuesto de bundle mide JS y CSS por separado, nunca sumados.** El Engineer detectó que DEC-10
+  fijaba *cómo* medir (`zlib` nivel 9, en bytes) pero no *qué*. Al revisarlo: el informe T-01b del Architect ya
+  proponía **tres presupuestos independientes** y yo perdí la fila del CSS al redactar DEC-08. Se restituye.
+  Sumar JS y CSS daría 72 321 B y dispararía un aviso hoy mismo sobre una página legítima, además de **ocultar
+  cuál de los dos creció**, que es justo lo que un presupuesto tiene que señalar.
+
+  | Métrica | Hoy (T-11) | Aviso | Límite duro |
+  |---|---|---|---|
+  | JS gzip(9) | **70 397 B** ✅ | 72 000 B | 75 000 B |
+  | JS sin comprimir | **227 302 B** ✅ | — | 235 000 B |
+  | CSS gzip(9) | **1 900 B** ✅ | — | 4 000 B |
+
+  T-12 implementa las tres comprobaciones por separado en `pnpm verify`, fallando por bytes y nombrando cuál se pasó.
+- **DEC-13 — D18 registrado: `index.html` declaraba `lang="en"` con la interfaz en español.** Hallazgo del Engineer
+  fuera de la lista de defectos, corregido en T-11. Incumple WCAG 3.1.1: un lector de pantalla lee contenido español
+  con fonética inglesa. Se registra como **D18** para que la auditoría lo cubra, con tarea T-11 y estado cerrado.
+  No estaba en el inventario original porque los 17 defectos salieron de leer `src/`, y este vivía en `index.html`.
+- **DEC-14 — `flex-wrap` en la barra a 480–767px: aceptado, a ratificar por el DESIGNER en T-14.** Con 11 controles
+  (7 slots + 4 extremos) no caben en una fila a 480px (11×40 + 10×8 = 520 px contra 448 disponibles). Envolver
+  mantiene C1 sin tocar el algoritmo de la ventana, que el spec dice explícitamente que no debe cambiar con el
+  viewport. Es un cambio de CSS reversible: si el Designer prefiere otra solución, la pide en la auditoría.
+
+## A.3 GATE 2 — cierre de la implementación (verificado por el ORCHESTRATOR)
+
+`pnpm verify` ejecutado por el Orchestrator: **exit 0**. 122 tests unitarios, 145 de navegador, 15 saltados con motivo.
+Presupuesto: JS 70 415 B, CSS 1 909 B, ambos dentro. 25 commits en la rama. Árbol limpio.
+Dependencias de producción: **`react` y `react-dom`, las mismas dos que al empezar.**
+
+**Nota de método:** mis greps de `any` y de marcadores `TODO` dieron falsos positivos (`overflow-wrap: anywhere`,
+la constante `TODOS_URL`, la palabra "METODO" sin tilde). Las afirmaciones del Engineer eran correctas y mi
+verificación no. Tercer caso en este proyecto de una medición que parecía decir algo y no lo decía.
+
+### Huecos de automatización declarados (entran en T-15 si la auditoría los confirma)
+- **B4** — ninguna herramienta comprueba que un lector de pantalla *pronuncie* el anuncio. Procedimiento manual
+  con VoiceOver, definido por el Architect en §7.2.
+- **Dedupe de StrictMode** — no verificable contra el build de producción. Cubierto por `useTodos.test.tsx` en
+  desarrollo y por la medición manual de T-09 (2 peticiones antes, 1 después).
+- **D18** — no hay test del atributo `lang`. Es una línea en `e2e/layout.spec.ts`; **se añade en T-15**, agrupado
+  con lo que salga de la auditoría, en vez de reabrir la implementación por un solo cambio.
+- **D4 técnico (dependencias justificadas) y E1 (sin dead code)** — juicio, no comando.
+
 ## B.0 Matriz de cobertura D1–D17 → tarea
 
 Añadida tras T-06, al detectar que **D4, D10 y D14 no estaban asignados a ninguna tarea**. Un defecto sin dueño
@@ -69,6 +129,7 @@ no se implementa y no se puede auditar. Esta matriz es la referencia para T-14.
 | D15 page size sin clamp | T-10 | Requiere test de regresión propio (T-10) |
 | D16 desbordamiento móvil | T-11 | Verificado en T-12 con `verify:runtime` |
 | D17 modo claro inexistente | T-11 | |
+| **D18 `lang="en"` con UI en español** | **T-11** | **Añadido tras T-11** (DEC-13). WCAG 3.1.1. Vivía en `index.html`, fuera del `src/` que produjo el inventario original |
 
 ## B. Tareas
 
@@ -85,8 +146,8 @@ Estados: `BLOCKED` `READY` `IN_PROGRESS` `REVIEW` `FAILED` `NEEDS_REMEDIATION` `
 | T-10 | Reescritura de la UI accesible (D1/D2/D3/D7/D11/D14/D15 + `disabled` de D6, B1–B4) | ENGINEER | GATE 1 | BLOCKED |
 | T-11 | Estilos y theming (D8/D9/D12/D16/D17, C1) | ENGINEER | T-10 | BLOCKED |
 | T-12 | Andamiaje `verify:runtime` con Playwright (DEC-05) | ENGINEER | T-11 (DEC-09) | BLOCKED |
-| T-13 | Cierre: `pnpm verify` en verde + evidencia | ENGINEER | T-10..T-12 | BLOCKED |
-| T-14 | **AUDIT MODE** — verificación independiente | DESIGNER | T-13 | BLOCKED |
+| T-13 | Cierre: `pnpm verify` en verde + evidencia | ENGINEER | T-10..T-12 | COMPLETE |
+| T-14 | **AUDIT MODE** — verificación independiente | DESIGNER | T-13 | READY |
 | T-15 | Remediación de hallazgos P0/P1 | ENGINEER | T-14 | BLOCKED |
 | T-16 | Validación final y veredicto | ORCHESTRATOR | T-15 | BLOCKED |
 
