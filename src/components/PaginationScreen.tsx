@@ -58,7 +58,9 @@ export function PaginationScreen() {
       <h1 id="screen-title">Lista de tareas</h1>
 
       <div className="screen__toolbar">
-        <StatusMessage>{status}</StatusMessage>
+        {/* T-02c: en error el banner es la unica copia visible del mensaje;
+            la region sigue existiendo y anunciando, pero oculta. */}
+        <StatusMessage visuallyHidden={error !== null}>{status}</StatusMessage>
         <PageSizeSelect
           value={pageSize}
           disabled={loading || error !== null}

@@ -325,6 +325,15 @@ describe('D15/A3 — cambiar el tamaño de página no rompe nada (DEC-07)', () =
 });
 
 describe('A4 — estados de pantalla', () => {
+  it('T-02c: en cargado el resumen SI es visible; solo en error se oculta', async () => {
+    stubFetch(() => ok(todos(200)));
+    const { container } = await mount();
+    await loaded();
+
+    const live = container.querySelector('[aria-live]');
+    expect(live).not.toHaveClass('sr-only');
+  });
+
   it('loading pinta tantas filas de esqueleto como el tamaño de página', async () => {
     stubFetch(() => new Promise<Response>(() => undefined));
     const { container } = await mount('/?pageSize=20');
@@ -339,12 +348,18 @@ describe('A4 — estados de pantalla', () => {
     const spy = stubFetch(() => (fallar ? new Response('boom', { status: 500 }) : ok(todos(200))));
     await mount();
 
-    // El texto sale dos veces a proposito: en la region aria-live (que lo
-    // anuncia) y en el banner (que lo muestra). Lo exige el design-spec §4+§6.
+    // T-02c: el mensaje sigue estando dos veces en el DOM —lo anuncia la
+    // region viva y lo muestra el banner— pero solo una copia es visible.
     const mensajes = await screen.findAllByText(
       'No se pudieron cargar los resultados. Inténtalo de nuevo.',
     );
     expect(mensajes).toHaveLength(2);
+    const ocultos = mensajes.filter((n) => n.classList.contains('sr-only'));
+    expect(ocultos).toHaveLength(1);
+    expect(ocultos[0]).toHaveAttribute('aria-live', 'polite');
+    expect(mensajes.filter((n) => !n.classList.contains('sr-only'))[0]).toHaveClass(
+      'error-banner__message',
+    );
     expect(spy).toHaveBeenCalledTimes(1);
 
     fallar = false;
