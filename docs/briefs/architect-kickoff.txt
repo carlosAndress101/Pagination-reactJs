@@ -1,17 +1,37 @@
-Soy el ORCHESTRATOR. Tarea asignada: T-01, modo READ-ONLY.
+Soy el ORCHESTRATOR. Tarea asignada: T-01 TECHNICAL DISCOVERY, modo READ-ONLY.
 
-Estamos en la rama feat/modernize-pagination. NO cambies de rama: el checkout es compartido con otros agentes.
+Eres el ÚNICO responsable de la investigación técnica de este proyecto. El Master Plan está bloqueado
+esperando tu informe: nada de implementación arranca hasta que entregues.
+
+Estamos en la rama feat/modernize-pagination. NO cambies de rama: el checkout es compartido.
 
 Haz exactamente esto:
-1. Lee docs/00-ORCHESTRATOR.md — contexto del proyecto, inventario real del repo y defectos confirmados D1-D10.
-2. Lee docs/briefs/architect-brief.md — tu brief completo, con las 7 secciones que debes entregar.
-3. Ejecútalo y escribe tu entregable en docs/architecture-analysis.md.
+1. Lee docs/00-ORCHESTRATOR.md — contexto de producto, defectos D1-D17 y decisiones DEC-01..DEC-04.
+2. Lee docs/briefs/architect-brief.md — tu brief completo con las 7 secciones a entregar.
+3. Lee docs/design-spec.md — el Designer ya entregó; su spec condiciona parte de la arquitectura.
+4. Escribe tu entregable en docs/architecture-analysis.md.
+
+IMPORTANTE — el material técnico que ya hay en los docs es INPUT A VALIDAR, no conclusión cerrada.
+Las secciones §2, §2.1 y §2.2 las produjeron el Engineer y el Orchestrator antes de que se te asignara
+la titularidad del análisis técnico. Revísalas con criterio propio: confirma, corrige o descarta con evidencia.
+Si algo está mal, dilo. Precedente: el diagnóstico original de D8 era falso y la medición lo tumbó.
+
+Añade a tu sección 7 una validación explícita de:
+ - la clasificación LATENTE de D8/D12 y el nuevo D17 (¿es la estrategia de theming correcta?)
+ - el umbral de ruptura de ~518px medido en D16
+ - los ratios de contraste y el algoritmo de ellipsis de docs/design-spec.md §2 y §3
+ - DEC-03 (allowBuilds=false para @swc/core y esbuild) — ¿te parece correcto?
 
 Regla dura: tu única escritura permitida es docs/architecture-analysis.md. No toques src/, package.json,
-vite.config.js ni ningún config. No instales dependencias. No hagas commits.
+vite.config.js ni ningún config. No hagas commits.
 
-Verifica cada versión con `npm view <pkg> version` en lugar de citarla de memoria.
-Cada tecnología necesita un veredicto explícito ADOPT o REJECT anclado en este código concreto, no en teoría.
-La decisión paginación-cliente vs paginación-servidor NO la cierras tú: la marcas como ESCALADA AL ORCHESTRATOR.
+Verifica cada versión con `npm view <pkg> version`, no de memoria. Runtime real instalado ahora mismo:
+react 18.3.1, react-dom 18.3.1, vite 4.5.14, eslint 8.57.1 (deprecated).
+
+Cada tecnología necesita veredicto explícito ADOPT o REJECT anclado en este código. DEC-02 te restringe:
+el stack de lint elegido debe cubrir reglas de a11y en JSX Y corrección estricta (eqeqeq incluido).
+
+La decisión paginación-cliente vs paginación-servidor NO la cierras tú: la analizas, recomiendas, y la marcas
+como ESCALADA AL ORCHESTRATOR.
 
 Cuando termines escribe la línea: T-01 COMPLETE

@@ -7,6 +7,21 @@ Fase actual: **TECHNICAL ANALYSIS** (T-01, T-02 en paralelo).
 
 ---
 
+## 0. GOBERNANZA — reparto de responsabilidades (vigente desde 2026-09-13)
+
+Flujo obligatorio:
+`DISCOVERY (producto) → ORCHESTRATOR` · `TECHNICAL DISCOVERY → ARCHITECT` · `MASTER PLAN → ORCHESTRATOR (a partir del informe del Architect)` ·
+`IMPLEMENTATION → ENGINEER` · `DESIGN → DESIGNER` · `AUDIT → DESIGNER en Audit Mode` · `FINAL DECISION → ORCHESTRATOR`
+
+**El Orchestrator NO realiza investigación técnica.** No audita dependencias, arquitectura, data flow, routing ni deuda
+técnica por su cuenta; solo lo necesario para entender el objetivo de producto. Coordina y decide, no sustituye al especialista.
+
+**El Master Plan no puede redactarse antes del informe del Architect.** Se construye a partir de sus hallazgos.
+
+> Nota de trazabilidad: el material técnico ya presente en §2, §2.1 y §2.2 se produjo antes de esta regla —
+> parte por el Engineer (T-04) y parte por el Orchestrator excediendo su rol. **Entra al Architect como INPUT
+> a validar, no como conclusión establecida.** El Architect puede confirmarlo, corregirlo o descartarlo con evidencia.
+
 ## 1. DISCOVERY — estado real del repositorio (verificado, 2026-09-13)
 
 Árbol completo (sin node_modules):
