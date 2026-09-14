@@ -34,5 +34,13 @@
     "react/react-in-jsx-scope": "off",
     "import/no-unassigned-import": "off"
   },
-  "ignorePatterns": ["dist", "coverage", "node_modules", "playwright-report", "test-results"]
+  "ignorePatterns": ["dist", "coverage", "node_modules", "playwright-report", "test-results"],
+  "overrides": [
+    {
+      "files": ["scripts/**"],
+      "rules": {
+        "no-console": "off"
+      }
+    }
+  ]
 }

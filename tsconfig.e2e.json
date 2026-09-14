@@ -11,9 +11,9 @@
     "skipLibCheck": true,
     "strict": true,
     "noUncheckedIndexedAccess": true,
-    "types": ["node"],
-    "allowJs": true,
-    "checkJs": false
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "types": ["node"]
   },
-  "include": ["vite.config.ts", "scripts/**/*.mjs"]
+  "include": ["playwright.config.ts", "e2e/**/*.ts"]
 }
