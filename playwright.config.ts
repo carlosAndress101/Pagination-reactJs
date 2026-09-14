@@ -13,6 +13,14 @@ import { defineConfig } from '@playwright/test';
 const PORT = 4173;
 const BASE_URL = `http://127.0.0.1:${String(PORT)}`;
 
+/**
+ * La banda de envoltura (H2) se verifica a anchos propios, medidos, que no
+ * coinciden con ningun proyecto. Corre en un unico proyecto y se excluye de los
+ * cinco de viewport: si no, el mismo spec se ejecutaria cinco veces fijando
+ * siempre el mismo ancho con `test.use`, que es coste por nada.
+ */
+const SPEC_BANDA = /wrap\.spec\.ts/;
+
 export default defineConfig({
   testDir: './e2e',
   globalSetup: './e2e/global-setup.ts',
@@ -41,10 +49,12 @@ export default defineConfig({
   // `prefers-reduced-motion` se fijan por bloque con `test.use`, para que cada
   // spec declare la condicion que necesita en vez de depender del proyecto.
   projects: [
-    { name: 'w320', use: { viewport: { width: 320, height: 720 } } },
-    { name: 'w375', use: { viewport: { width: 375, height: 720 } } },
-    { name: 'w414', use: { viewport: { width: 414, height: 720 } } },
-    { name: 'w768', use: { viewport: { width: 768, height: 900 } } },
-    { name: 'w1280', use: { viewport: { width: 1280, height: 900 } } },
+    { name: 'w320', testIgnore: SPEC_BANDA, use: { viewport: { width: 320, height: 720 } } },
+    { name: 'w375', testIgnore: SPEC_BANDA, use: { viewport: { width: 375, height: 720 } } },
+    { name: 'w414', testIgnore: SPEC_BANDA, use: { viewport: { width: 414, height: 720 } } },
+    { name: 'w768', testIgnore: SPEC_BANDA, use: { viewport: { width: 768, height: 900 } } },
+    { name: 'w1280', testIgnore: SPEC_BANDA, use: { viewport: { width: 1280, height: 900 } } },
+    // Sin viewport propio: cada bloque de `wrap.spec.ts` fija el suyo.
+    { name: 'banda', testMatch: SPEC_BANDA },
   ],
 });
