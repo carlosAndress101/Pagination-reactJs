@@ -74,6 +74,15 @@ test.describe('C1 — layout', () => {
     }
   });
 
+  /**
+   * D18 — WCAG 3.1.1. El unico de los 18 defectos que se cerro sin test de
+   * regresion: el atributo estaba en `index.html`, pero nada impedia perderlo.
+   */
+  test('el documento declara su idioma', async ({ page }) => {
+    await page.goto('/');
+    await expect(page.locator('html')).toHaveAttribute('lang', 'es');
+  });
+
   test('el resumen es visible en escritorio y sr-only en compacto', async ({ page }) => {
     await page.goto('/');
     const live = page.locator('[aria-live]');
