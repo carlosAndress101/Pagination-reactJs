@@ -1,0 +1,8 @@
+# DEC-03 (ORCHESTRATOR): scripts de build de dependencias bloqueados deliberadamente.
+# Evidencia: `pnpm build` es verde con ambos en false — @swc/core y esbuild entregan
+# binario precompilado vía optionalDependency, su postinstall no es necesario aquí.
+# Menos scripts ejecutados en install = menos superficie de supply chain.
+# Revisar si el Architect cambia el toolchain (p. ej. Vite 7 / Rolldown).
+allowBuilds:
+  '@swc/core': false
+  esbuild: false

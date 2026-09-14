@@ -40,7 +40,7 @@ Toda la app son 111 líneas en `src/components/Pagination.jsx`.
 | D5 | `Pagination.jsx:53-57` | Fetch sin estado loading/error, sin `AbortController`; StrictMode dispara doble petición en dev. |
 | D6 | `Pagination.jsx:97,103` | `==` en vez de `===`, ternarios redundantes (`? true : false`), y `disabled` mal definido cuando `pages` está vacío (carga inicial). |
 | D7 | `Pagination.jsx:106` | "Load More" es engañoso: no carga más datos, aumenta el tamaño de página en +5. |
-| D8 | `index.css:73-84` | En `prefers-color-scheme: light` pone `color: #e6e6e6` sobre fondo `#ffffff` → texto prácticamente invisible. Fallo de contraste grave. |
+| D8 | `index.css:73-84` | **RECLASIFICADO a LATENTE — ver §2.2.** El par roto existe en la cascada pero NO es visible hoy. Diagnóstico original del Orchestrator erróneo. |
 | D9 | `App.css`, `assets/react.svg`, `public/vite.svg`, `index.html:7` | Restos de plantilla Vite (`.logo`, `logo-spin`, `.read-the-docs`, título "Vite + React"). Dead code. |
 | D10 | `package.json`, `.eslintrc.cjs` | ESLint 8 en formato legacy y EOL; sin typecheck/test/format. |
 
@@ -60,10 +60,87 @@ Menores aceptados dentro de D9/D10, sin D# propio:
 - `index.css:26-33`: `body { display:flex; place-items:center }` — en flexbox `justify-items` se ignora; el centrado real lo hace `#root { margin: 0 auto }`. Resto de plantilla.
 - `.eslintrc.cjs` **sin `eslint-plugin-jsx-a11y`** — amplía D10: la config no solo es EOL, es que no cubre la categoría de defectos que domina este backlog (D3, D11 pasaron el lint limpiamente). **La config de lint objetivo debe incluir reglas de a11y, sea cual sea la herramienta elegida.**
 
+## 2.2 RECLASIFICACIONES tras T-04 BASELINE (evidencia medida en navegador, 2026-09-13)
+
+El baseline del ENGINEER corrigió tres diagnósticos. Las conclusiones de medición sustituyen a las de análisis estático.
+
+### D8 y D12 → **LATENTES, no activos**
+El diagnóstico original del Orchestrator ("la app es ilegible en modo claro") era **incorrecto**.
+Causa real: `index.css:32` fija `body { background-color: #242424 }` **fuera** de la media query, y el bloque
+`@media (prefers-color-scheme: light)` solo redefine `:root`, nunca `body`. Como `body` es `display:flex; min-height:100vh`,
+tapa el `#ffffff` del `html`. Medido en modo claro emulado: h1 y texto de lista dan **12.44:1** — cumplen de sobra.
+En modo claro la app se ve exactamente igual de oscura que en modo oscuro; no hay un solo píxel blanco.
+
+Siguen siendo obligatorios de arreglar, pero como **deuda latente**: en cuanto se normalice o elimine el fondo del
+`body` —primer paso de cualquier rediseño— el fallo se activa. No busques el síntoma en pantalla: no se ve.
+
+### D17 (NUEVO) — **el modo claro no existe**
+`index.css:6,73-84` declara `color-scheme: light dark` y una media query de modo claro, pero el resultado neto es que
+el tema claro **no llega a renderizarse nunca**. No es un fallo de contraste: es una funcionalidad rota que aparenta
+estar implementada. Se arregla decidiendo una estrategia de theming, no cambiando valores — por eso no entra dentro de D8.
+El `docs/design-spec.md` §2.1/§2.2 ya entrega paletas completas de ambos modos: **D17 queda cubierto por T-02**.
+
+### D16 → **CONFIRMADO**, y el umbral real no es 320px
+Medido con CDP sobre Chrome/153 headless contra el dev server:
+
+| viewport | scrollWidth | clientWidth | overflow |
+|---|---|---|---|
+| 320px | **550px** | 320 | +230px |
+| 375px | 550 | 375 | +175 |
+| 414px | 550 | 414 | +136 |
+
+`.pageNumbers` mide **486.4px** reales, no los ~370px que estimamos el Orchestrator y el Engineer por separado.
+El error de ambos: Prev y Next no son cajas pequeñas — su `<button>` interno lleva `font-size:1.5rem` (`style.css:30`)
+y arrastra los `<li>` a 126.6px y 129.5px. Solo Prev+Next son 256px de los 320 disponibles.
+**Punto de ruptura real: ~518px.** La app desborda en todo móvil y en tablet vertical.
+Lección de proceso: dos estimaciones independientes que coincidían estaban las dos mal. Medir, no estimar.
+
+Hallazgos adjuntos de la misma medición:
+- **B5 INCUMPLIDO en el código actual**: el objetivo táctil menor mide **29.1px** (el número "1"); mínimo exigido 44px.
+- `h1` computa a **51.2px** (`3.2em`) y desborda por sí solo: su borde derecho cae en 381px con viewport de 320.
+
+### D15 → **CONFIRMADO end to end, y más grave de lo redactado**
+Secuencia real: carga → 39 clicks en Next → 1 click en "Load More". Resultado medido:
+lista `<ul></ul>` literalmente vacía, y la barra queda en `Prev | … | Next` con **cero números de página**.
+Tres agravantes que no estaban en la redacción original y entran en el alcance del fix:
+1. No solo se vacía la lista: **desaparece también la ventana de números**. D15 y D1 se componen — el usuario pierde
+   el contenido *y* el mecanismo para volver.
+2. **Next sigue habilitado**: con `currentPage=40` y último elemento `20`, `40 == 20` es falso. El usuario puede
+   alejarse indefinidamente sin que nada lo frene.
+3. **Recuperarse cuesta 21 clicks a ciegas en Prev**; la pantalla no cambia hasta el click 21. En la práctica, el
+   usuario recarga o abandona.
+
+### D11 → confirmado en runtime
+Con el foco en Next por teclado: `outlineStyle === "none"`, `boxShadow === "none"`.
+Solo hay **3 elementos tabulables en toda la app** (Prev, Next, Load More); los 40 números son inalcanzables por
+teclado (`tabIndex:-1`, `role:null`, `aria-current:null`). Sin `<nav>`, sin `<main>`, sin `[aria-live]`.
+
+### Baseline de referencia para comparar al final
+```
+pnpm build  -> VERDE.  dist JS 143.93 kB / 46.35 kB gzip.  34 módulos.  225ms
+pnpm lint   -> 1 error: 'setPageNumberLimit' no usado (= D13). Nada más.
+runtime real: react 18.3.1, react-dom 18.3.1, vite 4.5.14, eslint 8.57.1 (deprecated)
+```
+**El linter detecta 1 de 17 defectos.** D3, D11, D14 pasan por falta de reglas de a11y; **D6 también pasa** porque
+`eqeqeq` no está en `eslint:recommended`.
+
 ## 2.1 DECISIONES CERRADAS POR EL ORCHESTRATOR
 
-- **DEC-01 — Gestor de paquetes: pnpm.** `pnpm-lock.yaml` ya existe y pnpm 12.3.4 está instalado localmente (`/opt/homebrew/bin/pnpm`). Mantenerlo evita churn de lockfile y una migración sin valor. No se usa npm ni yarn en este proyecto.
-- **DEC-02 — Cobertura de a11y en lint: obligatoria.** Cualquier stack de lint propuesto debe cubrir las reglas de accesibilidad en JSX. Si la herramienta elegida no las cubre, no es candidata válida.
+- **DEC-01 (REVISADA) — Gestor de paquetes: pnpm.** Se mantiene la decisión, **pero el argumento original era falso**:
+  pnpm 12.3.4 rechazó el lockfile versionado (`lockfileVersion 6.0` incompatible, `[WARN] Ignoring broken lockfile`)
+  y lo re-resolvió entero desde `package.json` (+2029 −1177 líneas, ahora `9.0`). El churn era inevitable y ya ocurrió.
+  pnpm se mantiene por estar instalado y ser el gestor de origen del proyecto, no por preservar el lockfile.
+- **DEC-02 (AMPLIADA) — Cobertura de lint: a11y **y** corrección estricta, obligatorias.** Cualquier stack de lint
+  propuesto debe cubrir (a) reglas de accesibilidad en JSX y (b) reglas de corrección estricta, `eqeqeq` incluida.
+  Motivo ampliado: el linter actual detecta 1 de 17 defectos. D3/D11/D14 se cuelan por falta de a11y y **D6 se cuela
+  porque `eqeqeq` no está en `eslint:recommended`**. Si la herramienta no cubre ambas categorías, no es candidata válida.
+- **DEC-03 — Lockfile regenerado: se commitea.** Se versiona el `pnpm-lock.yaml` 9.0 como parte de la modernización,
+  en un commit `chore(deps)` separado. Revertir a 6.0 no es opción: el pnpm instalado no puede consumirlo.
+  `pnpm-workspace.yaml` se versiona con `allowBuilds` resuelto a `false` para `@swc/core` y `esbuild` —
+  ambos traen binario precompilado, `pnpm build` es verde sin sus postinstall, y menos scripts en install = menos
+  superficie de supply chain. A revisar si el Architect cambia el toolchain.
+- **DEC-04 — Medir, no estimar.** Ningún defecto de layout, contraste o tamaño se da por confirmado sin medición real
+  en navegador. Precedente: D16 y D8, donde el análisis estático falló en ambas direcciones (uno subestimado, otro falso positivo).
 
 ## 3. PRODUCT DEFINITION
 
