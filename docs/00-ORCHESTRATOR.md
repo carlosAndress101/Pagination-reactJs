@@ -44,6 +44,27 @@ Toda la app son 111 líneas en `src/components/Pagination.jsx`.
 | D9 | `App.css`, `assets/react.svg`, `public/vite.svg`, `index.html:7` | Restos de plantilla Vite (`.logo`, `logo-spin`, `.read-the-docs`, título "Vite + React"). Dead code. |
 | D10 | `package.json`, `.eslintrc.cjs` | ESLint 8 en formato legacy y EOL; sin typecheck/test/format. |
 
+### Defectos adicionales (reportados por ENGINEER, verificados por ORCHESTRATOR 2026-09-13)
+
+| # | Ubicación | Problema | Verificación |
+|---|---|---|---|
+| D11 | `style/style.css:40-42` | `.pageNumbers li button:focus { outline: none }` elimina el foco de Prev/Next —los dos únicos controles navegables por teclado— sin sustituirlo. WCAG 2.4.7. Independiente de D3 y D8. Bloquea B3. | CONFIRMADO (grep) |
+| D12 | `style/style.css:8,20-22,29,36-37` | Blancos y negros hardcodeados sin considerar el esquema de color: bordes, píldora activa, color de botón y estado hover. En modo claro todo desaparece sobre fondo blanco. **D8 solo citaba `index.css`: arreglar únicamente ese archivo deja el bug vivo.** Ampliado por el Orchestrator para incluir `:36-37` (hover). | CONFIRMADO (grep) |
+| D13 | `Pagination.jsx:19` | `pageNumberLimit` es estado muerto: `setPageNumberLimit` no se invoca nunca. Constante disfrazada de `useState`. | CONFIRMADO (grep: solo lecturas en 63,64,71,72,73) |
+| D14 | `Pagination.jsx:23-24,41` | El número de página se lee del DOM vía `Number(event.target.id)`, con `id` numéricos globales por `<li>`. Contamina el espacio de ids del documento y falla si el click cae en un nodo hijo. Se resuelve con `onClick={() => goTo(n)}`. | CONFIRMADO (grep) |
+| D15 | `Pagination.jsx:87-89` + `32-34` | Subir el tamaño de página no clampea `currentPage`. Con `itemsPage=5, currentPage=40`, un click en Load More da `slice(390,400)` sobre 200 ítems → `[]`: lista en blanco sin estado empty. D1 es la ventana de números; esto vacía **los datos**. Requiere test propio. | CONFIRMADO (traza aritmética) |
+| D16 | `style/style.css:1-11` + `index.css:35-38` | `.pageNumbers` es `display:flex` sin `flex-wrap`; Prev + 5 números + 2 ellipsis + Next no caben en 320px → scroll horizontal. Incumple C1. | **PLAUSIBLE** — estimación ~370px por análisis estático. Pendiente de verificación visual real cuando la app arranque. No lo des por cerrado sin medirlo. |
+
+Menores aceptados dentro de D9/D10, sin D# propio:
+- `Pagination.jsx:1-2`: `useState` y `useEffect` en dos `import` separados.
+- `index.css:26-33`: `body { display:flex; place-items:center }` — en flexbox `justify-items` se ignora; el centrado real lo hace `#root { margin: 0 auto }`. Resto de plantilla.
+- `.eslintrc.cjs` **sin `eslint-plugin-jsx-a11y`** — amplía D10: la config no solo es EOL, es que no cubre la categoría de defectos que domina este backlog (D3, D11 pasaron el lint limpiamente). **La config de lint objetivo debe incluir reglas de a11y, sea cual sea la herramienta elegida.**
+
+## 2.1 DECISIONES CERRADAS POR EL ORCHESTRATOR
+
+- **DEC-01 — Gestor de paquetes: pnpm.** `pnpm-lock.yaml` ya existe y pnpm 12.3.4 está instalado localmente (`/opt/homebrew/bin/pnpm`). Mantenerlo evita churn de lockfile y una migración sin valor. No se usa npm ni yarn en este proyecto.
+- **DEC-02 — Cobertura de a11y en lint: obligatoria.** Cualquier stack de lint propuesto debe cubrir las reglas de accesibilidad en JSX. Si la herramienta elegida no las cubre, no es candidata válida.
+
 ## 3. PRODUCT DEFINITION
 
 Producto: **demo profesional de paginación** sobre una lista de tareas (200 ítems de JSONPlaceholder).
