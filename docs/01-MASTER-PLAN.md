@@ -23,6 +23,31 @@ ESLint 9 + typescript-eslint con linting *type-aware*, que oxlint no ofrece. Se 
 DEC-02 por completo, es preferencia declarada del usuario, y en una app sin cadenas de promesas la pérdida de
 reglas type-aware (`no-floating-promises`, `no-misused-promises`) es asumible. **No es un descuido: es una renuncia.**
 
+## B.0 Matriz de cobertura D1–D17 → tarea
+
+Añadida tras T-06, al detectar que **D4, D10 y D14 no estaban asignados a ninguna tarea**. Un defecto sin dueño
+no se implementa y no se puede auditar. Esta matriz es la referencia para T-14.
+
+| Defecto | Tarea | Nota |
+|---|---|---|
+| D1 ventana derivada desincronizada | T-10 | |
+| D2 `…` no salta de bloque | T-10 | El `…` pasa a `<span aria-hidden>` no interactivo (design-spec §3) |
+| D3 `<li onClick>` inaccesible | T-10 | Genera 6 de los 7 errores de oxlint vivos tras T-06 |
+| **D4 `key={index}`** | **T-06** | **Asignado tras el reporte del Engineer.** Una línea, sin efecto observable |
+| D5 fetch sin loading/error/abort | T-09 | |
+| D6 `==` y ternarios | T-06 **y** T-10 | **Partido:** el operador se corrige en T-06; el `disabled` derivado de `pages[0]` con datos vacíos **sigue vivo** y lo cierra T-10. Cambiar `==` por `===` no lo arregla: `1 === undefined` es `false` igual |
+| D7 "Load More" engañoso | T-10 | Se sustituye por el selector de tamaño de página |
+| D8 contraste latente | T-11 | |
+| D9 restos de plantilla | T-11 | |
+| **D10 ESLint EOL y sin a11y** | **T-05** | **Registrado retroactivamente.** Cerrado: ESLint fuera del árbol, oxlint con 36 reglas `jsx-a11y` |
+| D11 `outline:none` sin reemplazo | T-11 | El `:focus-visible` global vive en `index.css` (design-spec §2.4) |
+| D12 blancos hardcodeados | T-11 | |
+| D13 estado muerto | T-06 | ✅ cerrado |
+| **D14 página leída del DOM** | **T-10** | **Asignado explícitamente.** `onClick={() => goTo(n)}`; desaparecen los `id` numéricos globales |
+| D15 page size sin clamp | T-10 | Requiere test de regresión propio (T-10) |
+| D16 desbordamiento móvil | T-11 | Verificado en T-12 con `verify:runtime` |
+| D17 modo claro inexistente | T-11 | |
+
 ## B. Tareas
 
 Estados: `BLOCKED` `READY` `IN_PROGRESS` `REVIEW` `FAILED` `NEEDS_REMEDIATION` `COMPLETE`
@@ -35,7 +60,7 @@ Estados: `BLOCKED` `READY` `IN_PROGRESS` `REVIEW` `FAILED` `NEEDS_REMEDIATION` `
 | T-08 | Estado en URL (A5/A6) | ENGINEER | T-07 | BLOCKED |
 | T-09 | Capa de datos: `api.ts` + `useTodos` (A4/D5) | ENGINEER | T-06 | BLOCKED |
 | — | **GATE 1 — revisión del Orchestrator** | ORCHESTRATOR | T-05..T-09 | BLOCKED |
-| T-10 | Reescritura de la UI accesible (D1/D2/D3/D7/D11/D15, B1–B4) | ENGINEER | GATE 1 | BLOCKED |
+| T-10 | Reescritura de la UI accesible (D1/D2/D3/D7/D11/D14/D15 + `disabled` de D6, B1–B4) | ENGINEER | GATE 1 | BLOCKED |
 | T-11 | Estilos y theming (D8/D9/D12/D16/D17, C1) | ENGINEER | T-10 | BLOCKED |
 | T-12 | Andamiaje `verify:runtime` con Playwright (DEC-05) | ENGINEER | T-05 | BLOCKED |
 | T-13 | Cierre: `pnpm verify` en verde + evidencia | ENGINEER | T-10..T-12 | BLOCKED |
@@ -51,8 +76,9 @@ Estados: `BLOCKED` `READY` `IN_PROGRESS` `REVIEW` `FAILED` `NEEDS_REMEDIATION` `
 - Validación: pegar salida de `pnpm build`, `pnpm lint`, `pnpm exec tsc --version`, y `pnpm why @swc/core` (debe no encontrarlo).
 
 **T-06 — Migración a TS strict**
-- Resultado esperado: `main.tsx`, `App.tsx`, `components/Pagination.tsx`, `types.ts`. Sin `any`. D13 (estado muerto) y D6 (`==`, ternarios redundantes) corregidos. **Comportamiento idéntico** — los bugs D1/D2/D15 siguen vivos a propósito: se arreglan en T-10, no aquí.
-- AC: `pnpm typecheck` verde · `pnpm lint` sin errores · `pnpm build` verde · cero `any` · cero `.jsx` en `src/`.
+- Resultado esperado: `main.tsx`, `App.tsx`, `components/Pagination.tsx`, `types.ts`. Sin `any`. D13 (estado muerto), D6 (`==`, ternarios) y **D4 (`key={index}` → `key={todo.id}`)** corregidos. **Comportamiento idéntico** — los bugs D1/D2/D15 siguen vivos a propósito: se arreglan en T-10, no aquí.
+- AC **(corregido tras el reporte del Engineer)**: `pnpm typecheck` verde · `pnpm build` verde · cero `any` · cero `.jsx` en `src/` · `pnpm lint` **sin más errores que los de D3**, que cierra T-10.
+  > El AC original decía "`pnpm lint` sin errores" y era **imposible de cumplir sin invadir T-10**: D3 genera 6 errores de `jsx-a11y` y arreglarlo exige convertir los `<li onClick>` en `<button>` con teclado — un cambio de comportamiento observable que contradice la condición de equivalencia de esta misma tarea. Error de redacción mío, no desviación del Engineer.
 - Validación: pegar las tres salidas + `grep -rn ": any\|as any" src/` vacío.
 
 **T-07 — Lógica pura + tests**
