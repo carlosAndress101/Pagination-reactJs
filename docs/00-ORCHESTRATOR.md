@@ -174,6 +174,20 @@ runtime real: react 18.3.1, react-dom 18.3.1, vite 4.5.14, eslint 8.57.1 (deprec
   manual) lo define el **ARCHITECT** en la sección 7 de su informe, no el Orchestrator. DEC-05 reparte la
   titularidad; el Architect decide el cómo.
 
+- **DEC-06 — Un solo escritor de git por fase.** Dos agentes con permiso de commit sobre el mismo checkout
+  colisionan por mucha disciplina que se ponga: ya ocurrió dos veces, en las dos direcciones (un `git add -A`
+  del Orchestrator absorbió el árbol del Engineer; un `--amend` del Engineer reescribió un commit del
+  Orchestrator). Ninguna de las dos perdió contenido, pero ambas rompieron la trazabilidad, y la causa no se
+  elimina con reglas de uso: `--amend` opera sobre HEAD, y en un checkout compartido HEAD puede cambiar de dueño
+  entre un commit y su enmienda.
+  **Regla:** durante la fase de IMPLEMENTACIÓN (T-05..T-13) **git pertenece en exclusiva al ENGINEER**.
+  El Orchestrator no commitea: escribe los documentos que necesite y los deja **sin commitear**.
+  Los **GATES son las ventanas de sincronización**: en un gate el Engineer está parado por definición, y es ahí
+  —y solo ahí— donde el Orchestrator commitea su documentación acumulada.
+  El ARCHITECT y el DESIGNER nunca commitean; sus entregables los commitea quien tenga la ventana.
+  **Antes de cualquier `--amend`, verificar `git log -1` y abortar si el commit no es propio.** Ante la duda,
+  un commit nuevo de corrección en vez de reescribir: más ruidoso, pero no puede pisar a nadie.
+
 ## 3. PRODUCT DEFINITION
 
 Producto: **demo profesional de paginación** sobre una lista de tareas (200 ítems de JSONPlaceholder).
